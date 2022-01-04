@@ -1,9 +1,9 @@
-title: Hacker-Blog
-description: "A Jekyll Blog Theme For Hackers"
+title: 诸葛的博客
+description: "Web安全 && 二进制安全"
 author:
   name: "SomeHacker"
-  email: "someone@somewebsite.somedomain"
-  url: "https://ashishchaudhary.in/hacker-blog"
+  email: ""
+  url: "https://rogxo.github.io"
 
 baseurl: /
 
