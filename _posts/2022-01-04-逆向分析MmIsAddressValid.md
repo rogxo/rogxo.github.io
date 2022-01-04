@@ -1,5 +1,7 @@
-近期跟海哥学习了系统底层的一些知识，此处使用IDA对MmIsAddressValid进行逆向分析，以加深对Windows分页机制的了解
+## 近期跟海哥学习了系统底层的一些知识，此处使用IDA对MmIsAddressValid进行逆向分析，以加深对Windows分页机制的了解
 废话不多说，上代码
+
+* * *
 
 ```Assembly
 ;环境:Windows7 x32 ntoskrnl.exe 非PAE模式
