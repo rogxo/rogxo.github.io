@@ -1,0 +1,859 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Rogxo">
+  <meta name="keywords" content="安全,逆向,二进制">
+  
+    <meta name="description" content="12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929394959697989910010110210">
+<meta property="og:type" content="article">
+<meta property="og:title" content="X86 Assembly Instructions">
+<meta property="og:url" content="https://rogxo.github.io/2022/04/24/2022-04-24-X86%20Assembly%20Instructions/index.html">
+<meta property="og:site_name" content="诸葛的博客">
+<meta property="og:description" content="12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929394959697989910010110210">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-04-23T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-10T19:38:00.335Z">
+<meta property="article:author" content="Rogxo">
+<meta property="article:tag" content="汇编">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>X86 Assembly Instructions - 诸葛的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"rogxo.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>诸葛的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="X86 Assembly Instructions"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-04-24 00:00" pubdate>
+          2022年4月24日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          7.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          63 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">X86 Assembly Instructions</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br></pre></td><td class="code"><pre><code class="hljs asm">X86和X87汇编指令大全（有注释）  <br>---------- 一、数据传输指令 ----------------------------------------------------  <br>它们在存贮器和寄存器、寄存器和输入输出端口之间传送数据.  <br>1. 通用数据传送指令.  <br>    MOV     传送字或字节.  <br>    MOVSX   先符号扩展,再传送.  <br>    MOVZX   先零扩展,再传送.  <br>    PUSH    把字压入堆栈.  <br>    POP     把字弹出堆栈.  <br>    PUSHA   把AX,CX,DX,BX,SP,BP,SI,DI依次压入堆栈.  <br>    POPA    把DI,SI,BP,SP,BX,DX,CX,AX依次弹出堆栈.  <br>    PUSHAD  把EAX,ECX,EDX,EBX,ESP,EBP,ESI,EDI依次压入堆栈.  <br>    POPAD   把EDI,ESI,EBP,ESP,EBX,EDX,ECX,EAX依次弹出堆栈.  <br>    BSWAP   交换32位寄存器里字节的顺序  <br>    XCHG    交换字或字节.(至少有一个操作数为寄存器,段寄存器不可作为操作数)  <br>    CMPXCHG 比较并交换操作数.(第二个操作数必须为累加器AL/AX/EAX)  <br>    XADD    先交换再累加.(结果在第一个操作数里)  <br>    XLAT    字节查表转换.----BX指向一张256字节的表的起点,AL为表的索引值(0-255,即0-FFH);返回AL为查表结果.([BX+AL]-&gt;AL)  <br>2. 输入输出端口传送指令.  <br>    IN      I/O端口输入. ( 语法: IN   累加器,    &#123;端口号│DX&#125; )  <br>    OUT     I/O端口输出. ( 语法: OUT &#123;端口号│DX&#125;,累加器 )输入输出端口由立即方式指定时,    其范围是 0-255; 由寄存器 DX 指定时,其范围是    0-65535.  <br>3. 目的地址传送指令.  <br>    LEA     装入有效地址.例: LEA DX,string ;把偏移地址存到DX.  <br>    LDS     传送目标指针,把指针内容装入DS.例: LDS SI,string   ;把段地址:偏移地址存到DS:SI.  <br>    LES     传送目标指针,把指针内容装入ES.例: LES DI,string   ;把段地址:偏移地址存到ES:DI.  <br>    LFS     传送目标指针,把指针内容装入FS.例: LFS DI,string   ;把段地址:偏移地址存到FS:DI.  <br>    LGS     传送目标指针,把指针内容装入GS.例: LGS DI,string   ;把段地址:偏移地址存到GS:DI.  <br>    LSS     传送目标指针,把指针内容装入SS.例: LSS DI,string   ;把段地址:偏移地址存到SS:DI.  <br>4. 标志传送指令.  <br>    LAHF    标志寄存器传送,把标志装入AH.  <br>    SAHF    标志寄存器传送,把AH内容装入标志寄存器.  <br>    PUSHF   标志入栈.  <br>    POPF    标志出栈.  <br>    PUSHD   32位标志入栈.  <br>    POPD    32位标志出栈.  <br>---------- 二、算术运算指令 ----------------------------------------------------  <br>    ADD     加法.  <br>    ADC     带进位加法.  <br>    INC     加 1.  <br>    AAA     加法的ASCII码调整.  <br>    DAA     加法的十进制调整.  <br>    SUB     减法.  <br>    SBB     带借位减法.  <br>    DEC     减 1.  <br>    NEG     求反(以    0 减之).  <br>    CMP     比较.(两操作数作减法,仅修改标志位,不回送结果).  <br>    AAS     减法的ASCII码调整.  <br>    DAS     减法的十进制调整.  <br>    MUL     无符号乘法.结果回送AH和AL(字节运算),或DX和AX(字运算),  <br>    IMUL    整数乘法.结果回送AH和AL(字节运算),或DX和AX(字运算),  <br>    AAM     乘法的ASCII码调整.  <br>    DIV     无符号除法.结果回送:商回送AL,余数回送AH, (字节运算);或 商回送AX,余数回送DX, (字运算).  <br>    IDIV    整数除法.结果回送:商回送AL,余数回送AH, (字节运算);或 商回送AX,余数回送DX, (字运算).  <br>    AAD     除法的ASCII码调整.  <br>    CBW     字节转换为字. (把AL中字节的符号扩展到AH中去)  <br>    CWD     字转换为双字. (把AX中的字的符号扩展到DX中去)  <br>    CWDE    字转换为双字. (把AX中的字符号扩展到EAX中去)  <br>    CDQ     双字扩展. (把EAX中的字的符号扩展到EDX中去)  <br>---------- 三、逻辑运算指令 ----------------------------------------------------  <br>    AND     与运算.  <br>    OR      或运算.  <br>    XOR     异或运算.  <br>    NOT     取反.  <br>    TEST    测试.(两操作数作与运算,仅修改标志位,不回送结果).  <br>    SHL     逻辑左移.  <br>    SAL     算术左移.(=SHL)  <br>    SHR     逻辑右移.  <br>    SAR     算术右移.(=SHR)  <br>    ROL     循环左移.  <br>    ROR     循环右移.  <br>    RCL     通过进位的循环左移.  <br>    RCR     通过进位的循环右移.  <br>              以上八种移位指令,其移位次数可达255次.  <br>              移位一次时, 可直接用操作码. 如 SHL AX,1.  <br>              移位&gt;1次时, 则由寄存器CL给出移位次数.  <br>              如 MOV CL,04   SHL AX,CL  <br>---------- 四、串指令 ----------------------------------------------------------  <br>              DS:SI 源串段寄存器 :源串变址.  <br>              ES:DI 目标串段寄存器:目标串变址.  <br>              CX 重复次数计数器.  <br>              AL/AX 扫描值.  <br>              D标志   0表示重复操作中SI和DI应自动增量; 1表示应自动减量.  <br>              Z标志   用来控制扫描或比较操作的结束.  <br>    MOVS    串传送.( MOVSB 传送字符. MOVSW 传送字. MOVSD 传送双字. )  <br>    CMPS    串比较.( CMPSB 比较字符. CMPSW 比较字. )  <br>    SCAS    串扫描.把AL或AX的内容与目标串作比较,比较结果反映在标志位.  <br>    LODS    装入串.把源串中的元素(字或字节)逐一装入AL或AX中.( LODSB 传送字符. LODSW 传送字.    LODSD 传送双字. )  <br>    STOS    保存串.是LODS的逆过程.  <br>    REP         当CX/ECX&lt;&gt;0时重复.  <br>    REPE/REPZ   当ZF=1或比较结果相等,且CX/ECX&lt;&gt;0时重复.  <br>    REPNE/REPNZ 当ZF=0或比较结果不相等,且CX/ECX&lt;&gt;0时重复.  <br>    REPC        当CF=1且CX/ECX&lt;&gt;0时重复.  <br>    REPNC       当CF=0且CX/ECX&lt;&gt;0时重复.  <br>---------- 五、程序转移指令 ----------------------------------------------------  <br>1. 无条件转移指令 (长转移)  <br>    JMP         无条件转移指令  <br>    CALL        过程调用  <br>    RET/RETF    过程返回.  <br>2. 条件转移指令   (短转移,-128到+127的距离内)( 当且仅当(SF XOR OF)=1时,OP1&lt;OP2 )  <br>    JA/JNBE     不小于或不等于时转移.  <br>    JAE/JNB     大于或等于转移.  <br>    JB/JNAE     小于转移.  <br>    JBE/JNA     小于或等于转移.  <br>        以上四条,测试无符号整数运算的结果(标志C和Z).  <br>    JG/JNLE     大于转移.  <br>    JGE/JNL     大于或等于转移.  <br>    JL/JNGE     小于转移.  <br>    JLE/JNG     小于或等于转移.  <br>        以上四条,测试带符号整数运算的结果(标志S,O和Z).  <br>    JE/JZ       等于转移.  <br>    JNE/JNZ     不等于时转移.  <br>    JC          有进位时转移.  <br>    JNC         无进位时转移.  <br>    JNO         不溢出时转移.  <br>    JNP/JPO     奇偶性为奇数时转移.  <br>    JNS         符号位为 &quot;0&quot; 时转移.  <br>    JO          溢出转移.  <br>    JP/JPE      奇偶性为偶数时转移.  <br>    JS          符号位为 &quot;1&quot; 时转移.  <br>3. 循环控制指令(短转移)  <br>    LOOP            CX不为零时循环.  <br>    LOOPE/LOOPZ     CX不为零且标志Z=1时循环.  <br>    LOOPNE/LOOPNZ   CX不为零且标志Z=0时循环.  <br>    JCXZ            CX为零时转移.  <br>    JECXZ           ECX为零时转移.  <br>4. 中断指令  <br>    INT         中断指令  <br>    INTO        溢出中断  <br>    IRET        中断返回  <br>5. 处理器控制指令  <br>    HLT         处理器暂停,  直到出现中断或复位信号才继续.  <br>    WAIT        当芯片引线TEST为高电平时使CPU进入等待状态.  <br>    ESC         转换到外处理器.  <br>    LOCK        封锁总线.  <br>    NOP         空操作.  <br>    STC         置进位标志位.  <br>    CLC         清进位标志位.  <br>    CMC         进位标志取反.  <br>    STD         置方向标志位.  <br>    CLD         清方向标志位.  <br>    STI         置中断允许位.  <br>    CLI         清中断允许位.  <br>---------- 六、伪指令 ----------------------------------------------------------  <br>    DW          定义字(2字节).  <br>    PROC        定义过程.  <br>    ENDP        过程结束.  <br>    SEGMENT     定义段.  <br>    ASSUME      建立段寄存器寻址.  <br>    ENDS        段结束.  <br>    END         程序结束.  <br>---------- 七、处理机控制指令：标志处理指令 ------------------------------------  <br>    CLC     进位位置0指令  <br>    CMC     进位位求反指令  <br>    STC     进位位置为1指令  <br>    CLD     方向标志置1指令  <br>    STD     方向标志位置1指令  <br>    CLI     中断标志置0指令  <br>    STI     中断标志置1指令  <br>    NOP     无操作  <br>    HLT     停机  <br>    WAIT    等待  <br>    ESC     换码  <br>    LOCK    封锁  <br>========== 浮点运算指令集 ======================================================  <br>---------- 一、控制指令(带9B的控制指令前缀F变为FN时浮点不检查，机器码去掉9B)----  <br>FINIT                 初始化浮点部件                  机器码  9B DB E3  <br>FCLEX                 清除异常                         机器码  9B DB E2  <br>FDISI                 浮点检查禁止中断                 机器码  9B DB E1  <br>FENI                  浮点检查禁止中断二            机器码  9B DB E0  <br>WAIT                  同步CPU和FPU                    机器码  9B  <br>FWAIT                 同步CPU和FPU                    机器码  D9 D0  <br>FNOP                  无操作                          机器码  DA E9  <br>FXCH                  交换ST(0)和ST(1)                机器码  D9 C9  <br>FXCH ST(i)            交换ST(0)和ST(i)                机器码  D9 C1iii  <br>FSTSW ax              状态字到ax                       机器码  9B DF E0  <br>FSTSW   word ptr mem  状态字到mem                      机器码  9B DD mm111mmm  <br>FLDCW   word ptr mem  mem到状态字                      机器码  D9 mm101mmm  <br>FSTCW   word ptr mem  控制字到mem                      机器码  9B D9 mm111mmm  <br>  <br>FLDENV  word ptr mem  mem到全环境                      机器码  D9 mm100mmm  <br>FSTENV  word ptr mem  全环境到mem                      机器码  9B D9 mm110mmm  <br>FRSTOR  word ptr mem  mem到FPU状态                    机器码  DD mm100mmm  <br>FSAVE   word ptr mem  FPU状态到mem                    机器码  9B DD mm110mmm  <br>  <br>FFREE ST(i)           标志ST(i)未使用                   机器码  DD C0iii  <br>FDECSTP               减少栈指针1-&gt;0 2-&gt;1             机器码  D9 F6  <br>FINCSTP               增加栈指针0-&gt;1 1-&gt;2             机器码  D9 F7  <br>FSETPM                浮点设置保护                       机器码  DB E4  <br>---------- 二、数据传送指令 ----------------------------------------------------  <br>FLDZ                  将0.0装入ST(0)                  机器码  D9 EE  <br>FLD1                  将1.0装入ST(0)                  机器码  D9 E8  <br>FLDPI                 将π装入ST(0)                    机器码  D9 EB  <br>FLDL2T                将ln10/ln2装入ST(0)             机器码  D9 E9  <br>FLDL2E                将1/ln2装入ST(0)                机器码  D9 EA  <br>FLDLG2                将ln2/ln10装入ST(0)             机器码  D9 EC  <br>FLDLN2                将ln2装入ST(0)                  机器码  D9 ED  <br>  <br>FLD    real4 ptr mem  装入mem的单精度浮点数             机器码  D9 mm000mmm  <br>FLD    real8 ptr mem  装入mem的双精度浮点数             机器码  DD mm000mmm  <br>FLD   real10 ptr mem  装入mem的十字节浮点数             机器码  DB mm101mmm  <br>  <br>FILD    word ptr mem  装入mem的二字节整数              机器码  DF mm000mmm  <br>FILD   dword ptr mem  装入mem的四字节整数              机器码  DB mm000mmm  <br>FILD   qword ptr mem  装入mem的八字节整数              机器码  DF mm101mmm  <br>  <br>FBLD   tbyte ptr mem  装入mem的十字节BCD数            机器码  DF mm100mmm  <br>  <br>FST    real4 ptr mem  保存单精度浮点数到mem             机器码  D9 mm010mmm  <br>FST    real8 ptr mem  保存双精度浮点数到mem             机器码  DD mm010mmm  <br>  <br>FIST    word ptr mem  保存二字节整数到mem              机器码  DF mm010mmm  <br>FIST   dword ptr mem  保存四字节整数到mem              机器码  DB mm010mmm  <br>  <br>FSTP   real4 ptr mem  保存单精度浮点数到mem并出栈      机器码  D9 mm011mmm  <br>FSTP   real8 ptr mem  保存双精度浮点数到mem并出栈      机器码  DD mm011mmm  <br>FSTP  real10 ptr mem  保存十字节浮点数到mem并出栈      机器码  DB mm111mmm  <br>  <br>FISTP   word ptr mem  保存二字节整数到mem并出栈           机器码  DF mm011mmm  <br>FISTP  dword ptr mem  保存四字节整数到mem并出栈           机器码  DB mm011mmm  <br>FISTP  qword ptr mem  保存八字节整数到mem并出栈           机器码  DF mm111mmm  <br>  <br>FBSTP  tbyte ptr mem  保存十字节BCD数到mem并出栈     机器码  DF mm110mmm  <br>  <br>FCMOVB                ST(0),ST(i) &lt;时传送              机器码  DA C0iii  <br>FCMOVBE               ST(0),ST(i) &lt;=时传送             机器码  DA D0iii  <br>FCMOVE                ST(0),ST(i) =时传送             机器码  DA C1iii  <br>FCMOVNB               ST(0),ST(i) &gt;=时传送             机器码  DB C0iii  <br>FCMOVNBE              ST(0),ST(i) &gt;时传送              机器码  DB D0iii  <br>FCMOVNE               ST(0),ST(i) !=时传送            机器码  DB C1iii  <br>FCMOVNU               ST(0),ST(i) 有序时传送        机器码  DB D1iii  <br>FCMOVU                ST(0),ST(i) 无序时传送        机器码  DA D1iii  <br>---------- 三、比较指令   --------------------------------------------------------  <br>FCOM                  ST(0)-ST(1)                      机器码  D8 D1  <br>FCOMI                 ST(0),ST(i)  ST(0)-ST(1)         机器码  DB F0iii  <br>FCOMIP                ST(0),ST(i)  ST(0)-ST(1)并出栈   机器码  DF F0iii  <br>FCOM   real4 ptr mem  ST(0)-实数mem                      机器码  D8 mm010mmm  <br>FCOM   real8 ptr mem  ST(0)-实数mem                      机器码  DC mm010mmm  <br>  <br>FICOM   word ptr mem  ST(0)-整数mem                      机器码  DE mm010mmm  <br>FICOM  dword ptr mem  ST(0)-整数mem                      机器码  DA mm010mmm  <br>FICOMP  word ptr mem  ST(0)-整数mem并出栈               机器码  DE mm011mmm  <br>FICOMP dword ptr mem  ST(0)-整数mem并出栈               机器码  DA mm011mmm  <br>  <br>FTST                  ST(0)-0                          机器码  D9 E4  <br>FUCOM  ST(i)          ST(0)-ST(i)                      机器码  DD E0iii  <br>FUCOMP ST(i)          ST(0)-ST(i)并出栈                   机器码  DD E1iii  <br>FUCOMPP               ST(0)-ST(1)并二次出栈             机器码  DA E9  <br>FXAM                  ST(0)规格类型                    机器码  D9 E5  <br>---------- 四、运算指令   --------------------------------------------------------  <br>FADD                  把目的操作数 (直接接在指令后的变量或堆栈缓存器) 与来源操作数 (接在目的操作数后的变量或堆栈缓存器)  相加，并将结果存入目的操作数  <br>FADDP  ST(i),ST       这个指令是使目的操作数加上 ST  缓存器，并弹出 ST 缓存器，而目的操作数必须是堆栈缓存器的其中之一，最后不管目的操作数为何，经弹出一次后，目的操作数会变成上一个堆栈缓存器了  <br>FIADD                 FIADD 是把 ST   加上来源操作数，然后再存入 ST 缓存器，来源操作数必须是字组整数或短整数形态的变数  <br>  <br>FSUB                  减  <br>FSUBP  <br>FSUBR                 减数与被减数互换  <br>FSUBRP  <br>FISUB  <br>FISUBR  <br>  <br>FMUL                  乘  <br>FMULP  <br>FIMUL  <br>  <br>FDIV                  除  <br>FDIVP  <br>FDIVR  <br>FDIVRP  <br>FIDIV  <br>FIDIVR  <br>  <br>FCHS                  改变 ST 的正负值  <br>  <br>FABS                  把 ST  之值取出，取其绝对值后再存回去。  <br>  <br>FSQRT                 将 ST  之值取出，开根号后再存回去。  <br>  <br>FSCALE                这个指令是计算 ST*2^ST(1)之值，再把结果存入 ST 里而 ST(1)   之值不变。ST(1)  必须是在 -32768 到 32768 (-215 到 215 )之间的整数，如果超过这个范围计算结果无法确定，如果不是整数 ST(1)    会先向零舍入成整数再计算。所以为安全起见，最好是由字组整数载入到 ST(1) 里。  <br>  <br>FRNDINT               这个指令是把 ST 的数值舍入成整数，FPU    提供四种舍入方式，由 FPU 的控制字组(control    word)中的 RC 两个位决定  <br>                          RC    舍入控制  <br>                          00    四舍五入  <br>                          01    向负无限大舍入  <br>                          10    向正无限大舍入  <br>                          11    向零舍去  <br>================================================================================<br></code></pre></td></tr></table></figure>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%86%85%E6%A0%B8/" class="category-chain-item">内核</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%B1%87%E7%BC%96/" class="print-no-link">#汇编</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>X86 Assembly Instructions</div>
+      <div>https://rogxo.github.io/2022/04/24/2022-04-24-X86 Assembly Instructions/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Rogxo</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年4月24日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              CC BY-NC-SA 4.0
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/07/06/2022-07-06-x64%E5%88%86%E9%A1%B5/" title="x64分页">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">x64分页</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/02/23/2022-02-23-ObRegisterCallbacks%20C0000022%E9%94%99%E8%AF%AF/" title="ObRegisterCallbacks C0000022错误">
+                        <span class="hidden-mobile">ObRegisterCallbacks C0000022错误</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/openkounter.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

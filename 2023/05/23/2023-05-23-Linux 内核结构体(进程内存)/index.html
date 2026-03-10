@@ -1,0 +1,866 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Rogxo">
+  <meta name="keywords" content="安全,逆向,二进制">
+  
+    <meta name="description" content="12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929394959697989910010110210">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux 内核结构体(进程内存)">
+<meta property="og:url" content="https://rogxo.github.io/2023/05/23/2023-05-23-Linux%20%E5%86%85%E6%A0%B8%E7%BB%93%E6%9E%84%E4%BD%93(%E8%BF%9B%E7%A8%8B%E5%86%85%E5%AD%98)/index.html">
+<meta property="og:site_name" content="诸葛的博客">
+<meta property="og:description" content="12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929394959697989910010110210">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-05-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-10T19:38:00.340Z">
+<meta property="article:author" content="Rogxo">
+<meta property="article:tag" content="内核">
+<meta property="article:tag" content="分页">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>Linux 内核结构体(进程内存) - 诸葛的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"rogxo.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>诸葛的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Linux 内核结构体(进程内存)"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-05-23 00:00" pubdate>
+          2023年5月23日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          11k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          95 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Linux 内核结构体(进程内存)</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">task_struct</span> &#123;</span><br>    <span class="hljs-keyword">volatile</span> <span class="hljs-type">long</span> state;  <span class="hljs-comment">//说明了该进程是否可以执行,还是可中断等信息</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> flags;  <span class="hljs-comment">//Flage 是进程号,在调用fork()时给出</span><br>    <span class="hljs-type">int</span> sigpending;    <span class="hljs-comment">//进程上是否有待处理的信号</span><br>    <span class="hljs-type">mm_segment_t</span> addr_limit; <span class="hljs-comment">//进程地址空间,区分内核进程与普通进程在内存存放的位置不同</span><br>                            <span class="hljs-comment">//0-0xBFFFFFFF for user-thead</span><br>                            <span class="hljs-comment">//0-0xFFFFFFFF for kernel-thread</span><br>    <span class="hljs-comment">//调度标志,表示该进程是否需要重新调度,若非0,则当从内核态返回到用户态,会发生调度</span><br>    <span class="hljs-keyword">volatile</span> <span class="hljs-type">long</span> need_resched;<br>    <span class="hljs-type">int</span> lock_depth;  <span class="hljs-comment">//锁深度</span><br>    <span class="hljs-type">long</span> nice;       <span class="hljs-comment">//进程的基本时间片</span><br>    <span class="hljs-comment">//进程的调度策略,有三种,实时进程:SCHED_FIFO,SCHED_RR, 分时进程:SCHED_OTHER</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> policy;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">mm_struct</span> *<span class="hljs-title">mm</span>;</span> <span class="hljs-comment">//进程内存管理信息</span><br>    <span class="hljs-type">int</span> processor;<br>    <span class="hljs-comment">//若进程不在任何CPU上运行, cpus_runnable 的值是0，否则是1 这个值在运行队列被锁时更新</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> cpus_runnable, cpus_allowed;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">run_list</span>;</span> <span class="hljs-comment">//指向运行队列的指针</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> sleep_time;  <span class="hljs-comment">//进程的睡眠时间</span><br>    <span class="hljs-comment">//用于将系统中所有的进程连成一个双向循环链表, 其根是init_task</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">task_struct</span> *<span class="hljs-title">next_task</span>, *<span class="hljs-title">prev_task</span>;</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">mm_struct</span> *<span class="hljs-title">active_mm</span>;</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">local_pages</span>;</span>       <span class="hljs-comment">//指向本地页面      </span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> allocation_order, nr_local_pages;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">linux_binfmt</span> *<span class="hljs-title">binfmt</span>;</span>  <span class="hljs-comment">//进程所运行的可执行文件的格式</span><br>    <span class="hljs-type">int</span> exit_code, exit_signal;<br>    <span class="hljs-type">int</span> pdeath_signal;     <span class="hljs-comment">//父进程终止时向子进程发送的信号</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> personality;<br>    <span class="hljs-comment">//Linux可以运行由其他UNIX操作系统生成的符合iBCS2标准的程序</span><br>    <span class="hljs-type">int</span> did_exec:<span class="hljs-number">1</span>; <br>    <span class="hljs-type">pid_t</span> pid;    <span class="hljs-comment">//进程标识符,用来代表一个进程</span><br>    <span class="hljs-type">pid_t</span> pgrp;   <span class="hljs-comment">//进程组标识,表示进程所属的进程组</span><br>    <span class="hljs-type">pid_t</span> tty_old_pgrp;  <span class="hljs-comment">//进程控制终端所在的组标识</span><br>    <span class="hljs-type">pid_t</span> session;  <span class="hljs-comment">//进程的会话标识</span><br>    <span class="hljs-type">pid_t</span> tgid;<br>    <span class="hljs-type">int</span> leader;     <span class="hljs-comment">//表示进程是否为会话主管</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">task_struct</span> *<span class="hljs-title">p_opptr</span>,*<span class="hljs-title">p_pptr</span>,*<span class="hljs-title">p_cptr</span>,*<span class="hljs-title">p_ysptr</span>,*<span class="hljs-title">p_osptr</span>;</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">thread_group</span>;</span>   <span class="hljs-comment">//线程链表</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">task_struct</span> *<span class="hljs-title">pidhash_next</span>;</span> <span class="hljs-comment">//用于将进程链入HASH表</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">task_struct</span> **<span class="hljs-title">pidhash_pprev</span>;</span><br>    <span class="hljs-type">wait_queue_head_t</span> wait_chldexit;  <span class="hljs-comment">//供wait4()使用</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">completion</span> *<span class="hljs-title">vfork_done</span>;</span>  <span class="hljs-comment">//供vfork() 使用</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> rt_priority; <span class="hljs-comment">//实时优先级，用它计算实时进程调度时的weight值</span><br>     <br>    <span class="hljs-comment">//it_real_value，it_real_incr用于REAL定时器，单位为jiffies, 系统根据it_real_value</span><br>    <span class="hljs-comment">//设置定时器的第一个终止时间. 在定时器到期时，向进程发送SIGALRM信号，同时根据</span><br>    <span class="hljs-comment">//it_real_incr重置终止时间，it_prof_value，it_prof_incr用于Profile定时器，单位为jiffies。</span><br>    <span class="hljs-comment">//当进程运行时，不管在何种状态下，每个tick都使it_prof_value值减一，当减到0时，向进程发送</span><br>    <span class="hljs-comment">//信号SIGPROF，并根据it_prof_incr重置时间.</span><br>    <span class="hljs-comment">//it_virt_value，it_virt_value用于Virtual定时器，单位为jiffies。当进程运行时，不管在何种</span><br>    <span class="hljs-comment">//状态下，每个tick都使it_virt_value值减一当减到0时，向进程发送信号SIGVTALRM，根据</span><br>    <span class="hljs-comment">//it_virt_incr重置初值。</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> it_real_value, it_prof_value, it_virt_value;<br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> it_real_incr, it_prof_incr, it_virt_value;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">timer_list</span> <span class="hljs-title">real_timer</span>;</span>   <span class="hljs-comment">//指向实时定时器的指针</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">tms</span> <span class="hljs-title">times</span>;</span>      <span class="hljs-comment">//记录进程消耗的时间</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> start_time;  <span class="hljs-comment">//进程创建的时间</span><br>    <span class="hljs-comment">//记录进程在每个CPU上所消耗的用户态时间和核心态时间</span><br>    <span class="hljs-type">long</span> per_cpu_utime[NR_CPUS], per_cpu_stime[NR_CPUS]; <br>    <span class="hljs-comment">//内存缺页和交换信息:</span><br>    <span class="hljs-comment">//min_flt, maj_flt累计进程的次缺页数（Copy on　Write页和匿名页）和主缺页数（从映射文件或交换</span><br>    <span class="hljs-comment">//设备读入的页面数）； nswap记录进程累计换出的页面数，即写到交换设备上的页面数。</span><br>    <span class="hljs-comment">//cmin_flt, cmaj_flt, cnswap记录本进程为祖先的所有子孙进程的累计次缺页数，主缺页数和换出页面数。</span><br>    <span class="hljs-comment">//在父进程回收终止的子进程时，父进程会将子进程的这些信息累计到自己结构的这些域中</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> min_flt, maj_flt, nswap, cmin_flt, cmaj_flt, cnswap;<br>    <span class="hljs-type">int</span> swappable:<span class="hljs-number">1</span>; <span class="hljs-comment">//表示进程的虚拟地址空间是否允许换出</span><br>    <span class="hljs-comment">//进程认证信息</span><br>    <span class="hljs-comment">//uid,gid为运行该进程的用户的用户标识符和组标识符，通常是进程创建者的uid，gid</span><br>    <span class="hljs-comment">//euid，egid为有效uid,gid</span><br>    <span class="hljs-comment">//fsuid，fsgid为文件系统uid,gid，这两个ID号通常与有效uid,gid相等，在检查对于文件</span><br>    <span class="hljs-comment">//系统的访问权限时使用他们。</span><br>    <span class="hljs-comment">//suid，sgid为备份uid,gid</span><br>    <span class="hljs-type">uid_t</span> uid,euid,suid,fsuid;<br>    <span class="hljs-type">gid_t</span> gid,egid,sgid,fsgid;<br>    <span class="hljs-type">int</span> ngroups; <span class="hljs-comment">//记录进程在多少个用户组中</span><br>    <span class="hljs-type">gid_t</span> groups[NGROUPS]; <span class="hljs-comment">//记录进程所在的组</span><br>    <span class="hljs-comment">//进程的权能，分别是有效位集合，继承位集合，允许位集合</span><br>    <span class="hljs-type">kernel_cap_t</span> cap_effective, cap_inheritable, cap_permitted;<br>    <span class="hljs-type">int</span> keep_capabilities:<span class="hljs-number">1</span>;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">user_struct</span> *<span class="hljs-title">user</span>;</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">rlimit</span> <span class="hljs-title">rlim</span>[<span class="hljs-title">RLIM_NLIMITS</span>];</span>  <span class="hljs-comment">//与进程相关的资源限制信息</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">short</span> used_math;   <span class="hljs-comment">//是否使用FPU</span><br>    <span class="hljs-type">char</span> comm[<span class="hljs-number">16</span>];   <span class="hljs-comment">//进程正在运行的可执行文件名</span><br>     <span class="hljs-comment">//文件系统信息</span><br>    <span class="hljs-type">int</span> link_count, total_link_count;<br>    <span class="hljs-comment">//NULL if no tty 进程所在的控制终端，如果不需要控制终端，则该指针为空</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">tty_struct</span> *<span class="hljs-title">tty</span>;</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> locks;<br>    <span class="hljs-comment">//进程间通信信息</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">sem_undo</span> *<span class="hljs-title">semundo</span>;</span>  <span class="hljs-comment">//进程在信号灯上的所有undo操作</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">sem_queue</span> *<span class="hljs-title">semsleeping</span>;</span> <span class="hljs-comment">//当进程因为信号灯操作而挂起时，他在该队列中记录等待的操作</span><br>    <span class="hljs-comment">//进程的CPU状态，切换时，要保存到停止进程的task_struct中</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">thread_struct</span> <span class="hljs-title">thread</span>;</span><br>      <span class="hljs-comment">//文件系统信息</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">fs_struct</span> *<span class="hljs-title">fs</span>;</span><br>      <span class="hljs-comment">//打开文件信息</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">files_struct</span> *<span class="hljs-title">files</span>;</span><br>      <span class="hljs-comment">//信号处理函数</span><br>    <span class="hljs-type">spinlock_t</span> sigmask_lock;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">signal_struct</span> *<span class="hljs-title">sig</span>;</span> <span class="hljs-comment">//信号处理函数</span><br>    <span class="hljs-type">sigset_t</span> blocked;  <span class="hljs-comment">//进程当前要阻塞的信号，每个信号对应一位</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">sigpending</span> <span class="hljs-title">pending</span>;</span>  <span class="hljs-comment">//进程上是否有待处理的信号</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> sas_ss_sp;<br>    <span class="hljs-type">size_t</span> sas_ss_size;<br>    <span class="hljs-type">int</span> (*notifier)(<span class="hljs-type">void</span> *priv);<br>    <span class="hljs-type">void</span> *notifier_data;<br>    <span class="hljs-type">sigset_t</span> *notifier_mask;<br>    u32 parent_exec_id;<br>    u32 self_exec_id;<br>     <br>    <span class="hljs-type">spinlock_t</span> alloc_lock;<br>    <span class="hljs-type">void</span> *journal_info;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br></pre></td><td class="code"><pre><code class="hljs c">&lt;include/linux/mm_types.h&gt;<br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">mm_struct</span> &#123;</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> &#123;</span><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">vm_area_struct</span> *<span class="hljs-title">mmap</span>;</span>        <span class="hljs-comment">/* list of VMAs */</span><br><span class="hljs-comment">/*虚拟内存描述符链表，整个地址空间被分成不连续的内存，每片由vm_area_struct管理，所有vma按地址大小链表起来*/</span><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">rb_root</span> <span class="hljs-title">mm_rb</span>;</span><br><span class="hljs-comment">/*方便增删，把vma传入到红黑树中*/</span><br>        u64 vmacache_seqnum;                   <span class="hljs-comment">/* per-thread vmacache */</span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_SPECULATIVE_PAGE_FAULT</span><br>        <span class="hljs-type">rwlock_t</span> mm_rb_lock;    <span class="hljs-comment">/* Speculative page fault field */</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_MMU</span><br><span class="hljs-comment">/*函数指针，MMU芯片对应架构自己的分配虚拟内存函数*/</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-title function_">long</span> <span class="hljs-params">(*get_unmapped_area)</span> <span class="hljs-params">(<span class="hljs-keyword">struct</span> file *filp,</span><br><span class="hljs-params">                <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> addr, <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> len,</span><br><span class="hljs-params">                <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> pgoff, <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> flags)</span>;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> mmap_base;    <span class="hljs-comment">/* base of mmap area */</span><br><span class="hljs-comment">/*mmap开始映射地址*/</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> mmap_legacy_base; <span class="hljs-comment">/* base of mmap area in bottom-up allocations */</span><br><span class="hljs-comment">/*控制上下分配*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_HAVE_ARCH_COMPAT_MMAP_BASES</span><br>        <span class="hljs-comment">/* Base adresses for compatible mmap() */</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> mmap_compat_base;<br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> mmap_compat_legacy_base;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> task_size;    <span class="hljs-comment">/* size of task vm space */</span><br><span class="hljs-comment">/*虚拟地址空间大小*/</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> highest_vm_end;   <span class="hljs-comment">/* highest vma end address */</span><br><span class="hljs-comment">/*最后一个vma的vm_end值*/</span><br>        <span class="hljs-type">pgd_t</span> * pgd;<br><span class="hljs-comment">/*进程的页全局目录地址*/</span><br>        <span class="hljs-comment">/**</span><br><span class="hljs-comment">         * @mm_users: The number of users including userspace.</span><br><span class="hljs-comment">         *</span><br><span class="hljs-comment">         * Use mmget()/mmget_not_zero()/mmput() to modify. When this</span><br><span class="hljs-comment">         * drops to 0 (i.e. when the task exits and there are no other</span><br><span class="hljs-comment">         * temporary reference holders), we also release a reference on</span><br><span class="hljs-comment">         * @mm_count (which may then free the &amp;struct mm_struct if</span><br><span class="hljs-comment">         * @mm_count also drops to 0).</span><br><span class="hljs-comment">         */</span><br>        <span class="hljs-type">atomic_t</span> mm_users;<br><span class="hljs-comment">/*共享同一个用户虚拟地址空间的任务个数，为0的时候释放这个引用*/</span><br><br>        <span class="hljs-comment">/**</span><br><span class="hljs-comment">         * @mm_count: The number of references to &amp;struct mm_struct</span><br><span class="hljs-comment">         * (@mm_users count as 1).</span><br><span class="hljs-comment">         *</span><br><span class="hljs-comment">         * Use mmgrab()/mmdrop() to modify. When this drops to 0, the</span><br><span class="hljs-comment">         * &amp;struct mm_struct is freed.</span><br><span class="hljs-comment">         */</span><br>        <span class="hljs-type">atomic_t</span> mm_count;<br><span class="hljs-comment">/*mm被引用的计数，为0时，释放这个结构体*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_MMU <span class="hljs-comment">/*打开的*/</span></span><br>        <span class="hljs-type">atomic_long_t</span> pgtables_bytes;   <span class="hljs-comment">/* PTE page table pages */</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>        <span class="hljs-type">int</span> map_count;          <span class="hljs-comment">/* number of VMAs */</span><br><span class="hljs-comment">/*mm中vma的个数*/</span><br><br>        <span class="hljs-type">spinlock_t</span> page_table_lock; <span class="hljs-comment">/* Protects page tables and some</span><br><span class="hljs-comment">                         * counters</span><br><span class="hljs-comment">                         */</span><br><span class="hljs-comment">/*自旋锁，保护页表和计数器*/</span><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">rw_semaphore</span> <span class="hljs-title">mmap_sem</span>;</span><br><span class="hljs-comment">/*操作mmap和mm_rb时，通过锁保护防止并发，读写锁，所以使用信号量*/</span><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">mmlist</span>;</span> <span class="hljs-comment">/* List of maybe swapped mm&#x27;s. These</span><br><span class="hljs-comment">                      * are globally strung together off</span><br><span class="hljs-comment">                      * init_mm.mmlist, and are protected</span><br><span class="hljs-comment">                      * by mmlist_lock</span><br><span class="hljs-comment">                      */</span><br><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> hiwater_rss; <span class="hljs-comment">/* High-watermark of RSS usage */</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> hiwater_vm;  <span class="hljs-comment">/* High-water virtual memory usage */</span><br><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> total_vm;    <span class="hljs-comment">/* Total pages mapped */</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> locked_vm;   <span class="hljs-comment">/* Pages that have PG_mlocked set */</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> pinned_vm;   <span class="hljs-comment">/* Refcount permanently increased */</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> data_vm;     <span class="hljs-comment">/* VM_WRITE &amp; ~VM_SHARED &amp; ~VM_STACK */</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> exec_vm;     <span class="hljs-comment">/* VM_EXEC &amp; ~VM_WRITE &amp; ~VM_STACK */</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> stack_vm;    <span class="hljs-comment">/* VM_STACK */</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> def_flags;<br><br>        <span class="hljs-type">spinlock_t</span> arg_lock; <span class="hljs-comment">/* protect the below fields */</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> start_code, end_code, start_data, end_data;<br><span class="hljs-comment">/*代码段和数据段的起始地址和结束地址*/</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> start_brk, brk, start_stack;<br><span class="hljs-comment">/*堆的起始、结束地址，brk的值通过sys_brk系统调用调整；用户态栈的起始地址*/</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> arg_start, arg_end, env_start, env_end;<br><span class="hljs-comment">/*进程在应用程序启动时传递参数字符串的起始、结束地址；环境变量的起始、结束地址*/</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> saved_auxv[AT_VECTOR_SIZE]; <span class="hljs-comment">/* for /proc/PID/auxv */</span><br><br>        <span class="hljs-comment">/*</span><br><span class="hljs-comment">         * Special counters, in some configurations protected by the</span><br><span class="hljs-comment">         * page_table_lock, in other configurations by being atomic.</span><br><span class="hljs-comment">         */</span><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">mm_rss_stat</span> <span class="hljs-title">rss_stat</span>;</span><br><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">linux_binfmt</span> *<span class="hljs-title">binfmt</span>;</span><br><br>        <span class="hljs-comment">/* Architecture-specific MM context */</span><br>        <span class="hljs-type">mm_context_t</span> context;<br><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> flags; <span class="hljs-comment">/* Must use atomic bitops to access */</span><br><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">core_state</span> *<span class="hljs-title">core_state</span>;</span> <span class="hljs-comment">/* coredumping support */</span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_MEMBARRIER <span class="hljs-comment">//打开</span></span><br>        <span class="hljs-type">atomic_t</span> membarrier_state;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_AIO <span class="hljs-comment">//打开</span></span><br>        <span class="hljs-type">spinlock_t</span>          ioctx_lock;<br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kioctx_table</span> __<span class="hljs-title">rcu</span>   *<span class="hljs-title">ioctx_table</span>;</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_MEMCG  <span class="hljs-comment">//打开</span></span><br>        <span class="hljs-comment">/*</span><br><span class="hljs-comment">         * &quot;owner&quot; points to a task that is regarded as the canonical规范的</span><br><span class="hljs-comment">         * user/owner of this mm. All of the following must be true in</span><br><span class="hljs-comment">         * order for it to be changed:</span><br><span class="hljs-comment">         *</span><br><span class="hljs-comment">         * current == mm-&gt;owner</span><br><span class="hljs-comment">         * current-&gt;mm != mm</span><br><span class="hljs-comment">         * new_owner-&gt;mm == mm</span><br><span class="hljs-comment">         * new_owner-&gt;alloc_lock is held</span><br><span class="hljs-comment">         */</span><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">task_struct</span> __<span class="hljs-title">rcu</span> *<span class="hljs-title">owner</span>;</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">user_namespace</span> *<span class="hljs-title">user_ns</span>;</span><br><br>        <span class="hljs-comment">/* store ref to file /proc/&lt;pid&gt;/exe symlink points to */</span><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">file</span> __<span class="hljs-title">rcu</span> *<span class="hljs-title">exe_file</span>;</span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_MMU_NOTIFIER <span class="hljs-comment">//打开</span></span><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">mmu_notifier_mm</span> *<span class="hljs-title">mmu_notifier_mm</span>;</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">if</span> defined(CONFIG_TRANSPARENT_HUGEPAGE) &amp;&amp; !USE_SPLIT_PMD_PTLOCKS 关闭</span><br>        <span class="hljs-type">pgtable_t</span> pmd_huge_pte; <span class="hljs-comment">/* protected by page_table_lock */</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_NUMA_BALANCING <span class="hljs-comment">//关</span></span><br>        <span class="hljs-comment">/*</span><br><span class="hljs-comment">         * numa_next_scan is the next time that the PTEs will be marked</span><br><span class="hljs-comment">         * pte_numa. NUMA hinting faults will gather statistics and</span><br><span class="hljs-comment">         * migrate pages to new nodes if necessary.</span><br><span class="hljs-comment">         */</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> numa_next_scan;<br><br>        <span class="hljs-comment">/* Restart point for scanning and setting pte_numa */</span><br>        <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> numa_scan_offset;<br><br>        <span class="hljs-comment">/* numa_scan_seq prevents two threads setting pte_numa */</span><br>        <span class="hljs-type">int</span> numa_scan_seq;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>        <span class="hljs-comment">/*</span><br><span class="hljs-comment">         * An operation with batched TLB flushing is going on. Anything</span><br><span class="hljs-comment">         * that can move process memory needs to flush the TLB when</span><br><span class="hljs-comment">         * moving a PROT_NONE or PROT_NUMA mapped page.</span><br><span class="hljs-comment">         */</span><br>        <span class="hljs-type">atomic_t</span> tlb_flush_pending;<br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_ARCH_WANT_BATCHED_UNMAP_TLB_FLUSH <span class="hljs-comment">//关</span></span><br>        <span class="hljs-comment">/* See flush_tlb_batched_pending() */</span><br>        <span class="hljs-type">bool</span> tlb_flush_batched;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">uprobes_state</span> <span class="hljs-title">uprobes_state</span>;</span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_HUGETLB_PAGE  <span class="hljs-comment">//关</span></span><br>        <span class="hljs-type">atomic_long_t</span> hugetlb_usage;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">work_struct</span> <span class="hljs-title">async_put_work</span>;</span><br><br><span class="hljs-meta">#<span class="hljs-keyword">if</span> IS_ENABLED(CONFIG_HMM)</span><br>        <span class="hljs-comment">/* HMM needs to track a few things per mm */</span><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">hmm</span> *<span class="hljs-title">hmm</span>;</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>    &#125; __randomize_layout;<br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">     * The mm_cpumask needs to be at the end of mm_struct, because it</span><br><span class="hljs-comment">     * is dynamically sized based on nr_cpu_ids.</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> cpu_bitmap[];<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><code class="hljs c">&lt;include/linux/mm_types.h&gt;<br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">vm_area_struct</span> &#123;</span><br>    <span class="hljs-comment">/* The first cache line has the info for VMA tree walking. */</span><br><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> vm_start;     <span class="hljs-comment">/* Our start address within vm_mm. */</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> vm_end;       <span class="hljs-comment">/* The first byte after our end address</span><br><span class="hljs-comment">                       within vm_mm. */</span><br><span class="hljs-comment">/*[vm_start, vm_end) 这么个情况，表示一块虚拟内存空间*/</span><br>    <span class="hljs-comment">/* linked list of VM areas per task, sorted by address */</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">vm_area_struct</span> *<span class="hljs-title">vm_next</span>, *<span class="hljs-title">vm_prev</span>;</span><br><span class="hljs-comment">/*在mm-&gt;mmap链表中前后节点*/</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">rb_node</span> <span class="hljs-title">vm_rb</span>;</span><br><span class="hljs-comment">/*插入到mm-&gt;mm_rb红黑树的节点*/</span><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">     * Largest free memory gap in bytes to the left of this VMA.</span><br><span class="hljs-comment">     * Either between this VMA and vma-&gt;vm_prev, or between one of the</span><br><span class="hljs-comment">     * VMAs below us in the VMA rbtree and its -&gt;vm_prev. This helps</span><br><span class="hljs-comment">     * get_unmapped_area find a free area of the right size.</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> rb_subtree_gap;<br><span class="hljs-comment">/*以当前vma为根，左子树中最大可用虚拟内存区域的大小*/</span><br>    <span class="hljs-comment">/* Second cache line starts here. */</span><br><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">mm_struct</span> *<span class="hljs-title">vm_mm</span>;</span>    <span class="hljs-comment">/* The address space we belong to. */</span><br><span class="hljs-comment">/*同一进程所有的vma指向的vm_mm是相同的*/</span><br>    <span class="hljs-type">pgprot_t</span> vm_page_prot;      <span class="hljs-comment">/* Access permissions of this VMA. */</span><br><span class="hljs-comment">/*访问权限*/</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> vm_flags;     <span class="hljs-comment">/* Flags, see mm.h. */</span><br><span class="hljs-comment">/*属性，详看mm.h*/</span><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">     * For areas with an address space and backing store,</span><br><span class="hljs-comment">     * linkage into the address_space-&gt;i_mmap interval tree.</span><br><span class="hljs-comment">     *</span><br><span class="hljs-comment">     * For private anonymous mappings, a pointer to a null terminated string</span><br><span class="hljs-comment">     * in the user process containing the name given to the vma, or NULL</span><br><span class="hljs-comment">     * if unnamed.</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-class"><span class="hljs-keyword">union</span> &#123;</span><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> &#123;</span><br>            <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">rb_node</span> <span class="hljs-title">rb</span>;</span><br>            <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> rb_subtree_last;<br>        &#125; shared;<br>        <span class="hljs-type">const</span> <span class="hljs-type">char</span> __user *anon_name;<br>    &#125;;<br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">     * A file&#x27;s MAP_PRIVATE vma can be in both i_mmap tree and anon_vma</span><br><span class="hljs-comment">     * list, after a COW of one of the file pages.  A MAP_SHARED vma</span><br><span class="hljs-comment">     * can only be in the i_mmap tree.  An anonymous MAP_PRIVATE, stack</span><br><span class="hljs-comment">     * or brk vma (with NULL file) can only be in an anon_vma list.</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">anon_vma_chain</span>;</span> <span class="hljs-comment">/* Serialized by mmap_sem &amp;</span><br><span class="hljs-comment">                      * page_table_lock */</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">anon_vma</span> *<span class="hljs-title">anon_vma</span>;</span>  <span class="hljs-comment">/* Serialized by page_table_lock */</span><br><br>    <span class="hljs-comment">/* Function pointers to deal with this struct. */</span><br>    <span class="hljs-type">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">vm_operations_struct</span> *<span class="hljs-title">vm_ops</span>;</span><br><span class="hljs-comment">/*该vma操作函数，包括打开、关闭、建立映射三个函数*/</span><br><br>    <span class="hljs-comment">/* Information about our backing store: */</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> vm_pgoff;     <span class="hljs-comment">/* Offset (within vm_file) in PAGE_SIZE</span><br><span class="hljs-comment">                       units */</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">file</span> * <span class="hljs-title">vm_file</span>;</span>      <span class="hljs-comment">/* File we map to (can be NULL). */</span><br><span class="hljs-comment">/*文件映射的文件信息，匿名映射为NULL*/</span><br>    <span class="hljs-type">void</span> * vm_private_data;     <span class="hljs-comment">/* was vm_pte (shared mem) */</span><br><br>    <span class="hljs-type">atomic_long_t</span> swap_readahead_info;<br><span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> CONFIG_MMU</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">vm_region</span> *<span class="hljs-title">vm_region</span>;</span>    <span class="hljs-comment">/* NOMMU mapping region */</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_NUMA</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">mempolicy</span> *<span class="hljs-title">vm_policy</span>;</span>    <span class="hljs-comment">/* NUMA policy for the VMA */</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">vm_userfaultfd_ctx</span> <span class="hljs-title">vm_userfaultfd_ctx</span>;</span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_SPECULATIVE_PAGE_FAULT</span><br>    <span class="hljs-type">seqcount_t</span> vm_sequence;     <span class="hljs-comment">/* Speculative page fault field */</span><br>    <span class="hljs-type">atomic_t</span> vm_ref_count;      <span class="hljs-comment">/* see vma_get(), vma_put() */</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>&#125; __randomize_layout;<br></code></pre></td></tr></table></figure>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%86%85%E6%A0%B8/" class="category-chain-item">内核</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%88%86%E9%A1%B5/" class="print-no-link">#分页</a>
+      
+        <a href="/tags/%E5%86%85%E6%A0%B8/" class="print-no-link">#内核</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Linux 内核结构体(进程内存)</div>
+      <div>https://rogxo.github.io/2023/05/23/2023-05-23-Linux 内核结构体(进程内存)/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Rogxo</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年5月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              CC BY-NC-SA 4.0
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2023/05/26/2023-05-26-%E5%AE%89%E5%8D%93%E5%86%85%E6%A0%B8%E9%80%86%E5%90%91/" title="安卓内核逆向">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">安卓内核逆向</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/03/27/2023-03-27-R0%20Debug%20API/" title="R0 Debug API">
+                        <span class="hidden-mobile">R0 Debug API</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/openkounter.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

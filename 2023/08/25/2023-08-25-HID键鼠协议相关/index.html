@@ -1,0 +1,871 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Rogxo">
+  <meta name="keywords" content="安全,逆向,二进制">
+  
+    <meta name="description" content="https:&#x2F;&#x2F;learn.microsoft.com&#x2F;en-us&#x2F;windows-hardware&#x2F;drivers&#x2F;hid&#x2F;keyboard-and-mouse-hid-client-drivers https:&#x2F;&#x2F;learn.microsoft.com&#x2F;en-us&#x2F;windows-hardware&#x2F;drivers&#x2F;hid&#x2F;hid-transports   1234567891011121314">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HID键鼠协议相关">
+<meta property="og:url" content="https://rogxo.github.io/2023/08/25/2023-08-25-HID%E9%94%AE%E9%BC%A0%E5%8D%8F%E8%AE%AE%E7%9B%B8%E5%85%B3/index.html">
+<meta property="og:site_name" content="诸葛的博客">
+<meta property="og:description" content="https:&#x2F;&#x2F;learn.microsoft.com&#x2F;en-us&#x2F;windows-hardware&#x2F;drivers&#x2F;hid&#x2F;keyboard-and-mouse-hid-client-drivers https:&#x2F;&#x2F;learn.microsoft.com&#x2F;en-us&#x2F;windows-hardware&#x2F;drivers&#x2F;hid&#x2F;hid-transports   1234567891011121314">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://rogxo.github.io/images/35b15f17b42e7fd643c2147e4d169c84-1.png">
+<meta property="og:image" content="https://rogxo.github.io/images/2dc6a1cd9af6d972a1c97b63a7e85552-1.png">
+<meta property="article:published_time" content="2023-08-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-10T19:38:00.341Z">
+<meta property="article:author" content="Rogxo">
+<meta property="article:tag" content="内核">
+<meta property="article:tag" content="分页">
+<meta property="article:tag" content="键鼠">
+<meta property="article:tag" content="驱动">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://rogxo.github.io/images/35b15f17b42e7fd643c2147e4d169c84-1.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>HID键鼠协议相关 - 诸葛的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"rogxo.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>诸葛的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="HID键鼠协议相关"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-08-25 00:00" pubdate>
+          2023年8月25日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          76 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">HID键鼠协议相关</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/keyboard-and-mouse-hid-client-drivers">https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/keyboard-and-mouse-hid-client-drivers</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/hid-transports">https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/hid-transports</a></p>
+<p><img src="/images/35b15f17b42e7fd643c2147e4d169c84-1.png" srcset="/img/loading.gif" lazyload alt="35b15f17b42e7fd643c2147e4d169c84.png"></p>
+<p><img src="/images/2dc6a1cd9af6d972a1c97b63a7e85552-1.png" srcset="/img/loading.gif" lazyload alt="2dc6a1cd9af6d972a1c97b63a7e85552.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs x">00 fffff805`434a2fd8 fffff805`486c3aa8     mouclass!MouseClassServiceCallback<br>01 fffff805`434a2fe0 fffff805`40824e6e     mouhid!MouHid_ReadComplete+0x758<br>02 fffff805`434a3080 fffff805`40824d37     nt!IopfCompleteRequest+0x11e<br>03 fffff805`434a3170 fffff805`4868aef5     nt!IofCompleteRequest+0x17<br>04 fffff805`434a31a0 fffff805`4868a7ed     HIDCLASS!HidpDistributeInterruptReport+0x3f5<br>05 fffff805`434a32a0 fffff805`40824e6e     HIDCLASS!HidpInterruptReadComplete+0x37d<br>06 fffff805`434a3340 fffff805`40824d37     nt!IopfCompleteRequest+0x11e<br>07 fffff805`434a3430 fffff805`41cc811a     nt!IofCompleteRequest+0x17<br>08 (Inline Function) --------`--------     Wdf01000!FxIrp::CompleteRequest+0x13 [minkernel\wdf\framework\shared\inc\private\km\FxIrpKm.hpp @ 75] <br>09 fffff805`434a3460 fffff805`41cc5bbf     Wdf01000!FxRequest::CompleteInternal+0x23a [minkernel\wdf\framework\shared\core\fxrequest.cpp @ 869] <br>0a (Inline Function) --------`--------     Wdf01000!FxRequest::Complete+0x31 [minkernel\wdf\framework\shared\inc\private\common\FxRequest.hpp @ 805] <br>0b fffff805`434a34f0 fffff805`4476cb4d     Wdf01000!imp_WdfRequestComplete+0x8f [minkernel\wdf\framework\shared\core\fxrequestapi.cpp @ 436] <br>0c fffff805`434a3550 fffff805`4476ca11     USBXHCI!Bulk_Transfer_CompleteCancelable+0xc9<br>0d fffff805`434a35b0 fffff805`4476c800     USBXHCI!Bulk_ProcessTransferEventWithED1+0x1fd<br>0e fffff805`434a3660 fffff805`44767101     USBXHCI!Bulk_EP_TransferEventHandler+0x10<br>0f fffff805`434a3690 fffff805`44766c35     USBXHCI!Endpoint_TransferEventHandler+0xb1<br>10 fffff805`434a36f0 fffff805`4476690c     USBXHCI!Interrupter_DeferredWorkProcessor+0x315<br>11 fffff805`434a37f0 fffff805`41cc38f6     USBXHCI!Interrupter_WdfEvtInterruptDpc+0xc<br>12 (Inline Function) --------`--------     Wdf01000!FxInterrupt::DpcHandler+0x6e [minkernel\wdf\framework\shared\irphandlers\pnp\km\interruptobjectkm.cpp @ 75] <br>13 fffff805`434a3820 fffff805`4083989e     Wdf01000!FxInterrupt::_InterruptDpcThunk+0xa6 [minkernel\wdf\framework\shared\irphandlers\pnp\km\interruptobjectkm.cpp @ 410] <br>14 fffff805`434a3860 fffff805`40838b84     nt!KiExecuteAllDpcs+0x30e<br>15 fffff805`434a39d0 fffff805`40a01b3e     nt!KiRetireDpcList+0x1f4<br>16 fffff805`434a3c60 00000000`00000000     nt!KiIdleLoop+0x9e<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br></pre></td><td class="code"><pre><code class="hljs x86asm">mouhid!MouHid_ReadComplete+<span class="hljs-number">0x758</span>:<br><span class="hljs-symbol">.text:</span>00000001C0003A80 <span class="hljs-number">48</span> 8B 8F E0 <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>          <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rcx</span>, [<span class="hljs-built_in">rdi</span>+<span class="hljs-number">0E0h</span>]<br><span class="hljs-symbol">.text:</span>00000001C0003A87 4C <span class="hljs-number">8D</span> <span class="hljs-number">87</span> <span class="hljs-number">78</span> <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>          <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">r8</span>, [<span class="hljs-built_in">rdi</span>+<span class="hljs-number">178h</span>]<br><span class="hljs-symbol">.text:</span>00000001C0003A8E 8A D8                         <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">bl</span>, <span class="hljs-built_in">al</span><br><span class="hljs-symbol">.text:</span>00000001C0003A90 <span class="hljs-number">48</span> <span class="hljs-number">8D</span> <span class="hljs-number">97</span> <span class="hljs-number">60</span> <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>          <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdx</span>, [<span class="hljs-built_in">rdi</span>+<span class="hljs-number">160h</span>]<br><span class="hljs-symbol">.text:</span>00000001C0003A97 <span class="hljs-number">48</span> 8B <span class="hljs-number">87</span> E8 <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>          <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rax</span>, [<span class="hljs-built_in">rdi</span>+<span class="hljs-number">0E8h</span>]<br><span class="hljs-symbol">.text:</span>00000001C0003A9E 4C <span class="hljs-number">8D</span> <span class="hljs-number">4D</span> EC                   <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">r9</span>, [<span class="hljs-built_in">rbp</span>+Consumed]<br><span class="hljs-symbol">.text:</span>00000001C0003AA2 FF <span class="hljs-number">15</span> <span class="hljs-number">58</span> <span class="hljs-number">57</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>             <span class="hljs-keyword">call</span>    <span class="hljs-built_in">cs</span>:__guard_dispatch_icall_fptr  <span class="hljs-comment">; call MouseClassServiceCallback</span><br><span class="hljs-symbol">.text:</span>00000001C0003AA2<br><span class="hljs-symbol">.text:</span>00000001C0003AA8 8A CB                         <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">cl</span>, <span class="hljs-built_in">bl</span>                          <span class="hljs-comment">; NewIrql</span><br><span class="hljs-symbol">.text:</span>00000001C0003AAA <span class="hljs-number">48</span> FF <span class="hljs-number">15</span> 8F <span class="hljs-number">56</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>          <span class="hljs-keyword">call</span>    <span class="hljs-built_in">cs</span>:__imp_KeLowerIrql<br><span class="hljs-symbol">.text:</span>00000001C0003AAA<br><span class="hljs-symbol">.text:</span>00000001C0003AB1 0F 1F <span class="hljs-number">44</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>                <span class="hljs-keyword">nop</span>     <span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> [<span class="hljs-built_in">rax</span>+<span class="hljs-built_in">rax</span>+<span class="hljs-number">00h</span>]<br><span class="hljs-symbol">.text:</span>00000001C0003AB6 <span class="hljs-number">33</span> <span class="hljs-built_in">DB</span>                         <span class="hljs-keyword">xor</span>     <span class="hljs-built_in">ebx</span>, <span class="hljs-built_in">ebx</span><br><span class="hljs-symbol">.text:</span>00000001C0003AB8 <span class="hljs-number">38</span> <span class="hljs-number">5D</span> <span class="hljs-number">50</span>                      <span class="hljs-keyword">cmp</span>     [<span class="hljs-built_in">rbp</span>+arg_8], <span class="hljs-built_in">bl</span><br><span class="hljs-symbol">.text:</span>00000001C0003ABB <span class="hljs-number">74</span> <span class="hljs-number">46</span>                         <span class="hljs-keyword">jz</span>      short loc_1C0003B03<br><br><br>HIDCLASS!HidpDistributeInterruptReport+<span class="hljs-number">0x3f5</span>:<br><span class="hljs-symbol">.text:</span>00000001C000AECC <span class="hljs-number">48</span> <span class="hljs-number">8D</span> <span class="hljs-number">94</span> <span class="hljs-number">24</span> B0 <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdx</span>, [<span class="hljs-built_in">rsp</span>+<span class="hljs-number">0F8h</span>+var_48]<br><span class="hljs-symbol">.text:</span>00000001C000AED4 <span class="hljs-number">48</span> <span class="hljs-number">89</span> <span class="hljs-number">84</span> <span class="hljs-number">24</span> B0 <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       <span class="hljs-keyword">mov</span>     [<span class="hljs-built_in">rsp</span>+<span class="hljs-number">0F8h</span>+var_48], <span class="hljs-built_in">rax</span><br><span class="hljs-symbol">.text:</span>00000001C000AEDC <span class="hljs-number">48</span> <span class="hljs-number">89</span> <span class="hljs-number">50</span> <span class="hljs-number">08</span>                   <span class="hljs-keyword">mov</span>     [<span class="hljs-built_in">rax</span>+<span class="hljs-number">8</span>], <span class="hljs-built_in">rdx</span><br><span class="hljs-symbol">.text:</span>00000001C000AEE0 <span class="hljs-number">48</span> <span class="hljs-number">81</span> C1 <span class="hljs-number">58</span> FF FF FF          <span class="hljs-keyword">add</span>     <span class="hljs-built_in">rcx</span>, <span class="hljs-number">0FFFFFFFFFFFFFF58h</span>         <span class="hljs-comment">; Irp</span><br><span class="hljs-symbol">.text:</span>00000001C000AEE7 B2 <span class="hljs-number">06</span>                         <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">dl</span>, <span class="hljs-number">6</span>                           <span class="hljs-comment">; PriorityBoost</span><br><span class="hljs-symbol">.text:</span>00000001C000AEE9 <span class="hljs-number">48</span> FF <span class="hljs-number">15</span> <span class="hljs-number">70</span> <span class="hljs-number">04</span> <span class="hljs-number">02</span> <span class="hljs-number">00</span>          <span class="hljs-keyword">call</span>    <span class="hljs-built_in">cs</span>:__imp_IofCompleteRequest<br><span class="hljs-symbol">.text:</span>00000001C000AEE9<br><span class="hljs-symbol">.text:</span>00000001C000AEF0 0F 1F <span class="hljs-number">44</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>                <span class="hljs-keyword">nop</span>     <span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> [<span class="hljs-built_in">rax</span>+<span class="hljs-built_in">rax</span>+<span class="hljs-number">00h</span>]<br><span class="hljs-symbol">.text:</span>00000001C000AEF5 EB A9                         <span class="hljs-keyword">jmp</span>     short loc_1C000AEA0<br><br><br>HIDCLASS!HidpInterruptReadComplete+<span class="hljs-number">0x37d</span>:<br><span class="hljs-symbol">.text:</span>00000001C000A7CA 0F B6 <span class="hljs-number">87</span> <span class="hljs-number">01</span> <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>          <span class="hljs-keyword">movzx</span>   <span class="hljs-built_in">eax</span>, <span class="hljs-built_in">byte</span> <span class="hljs-built_in">ptr</span> [<span class="hljs-built_in">rdi</span>+<span class="hljs-number">101h</span>]<br><span class="hljs-symbol">.text:</span>00000001C000A7D1 <span class="hljs-number">49</span> 8B D5                      <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rdx</span>, <span class="hljs-built_in">r13</span><br><span class="hljs-symbol">.text:</span>00000001C000A7D4 <span class="hljs-number">45</span> 0F B7 4C <span class="hljs-number">24</span> <span class="hljs-number">14</span>             <span class="hljs-keyword">movzx</span>   <span class="hljs-built_in">r9d</span>, <span class="hljs-built_in">word</span> <span class="hljs-built_in">ptr</span> [<span class="hljs-built_in">r12</span>+<span class="hljs-number">14h</span>]<br><span class="hljs-symbol">.text:</span>00000001C000A7DA <span class="hljs-number">48</span> 8B CB                      <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rcx</span>, <span class="hljs-built_in">rbx</span><br><span class="hljs-symbol">.text:</span>00000001C000A7DD <span class="hljs-number">4D</span> 8B <span class="hljs-number">85</span> <span class="hljs-number">20</span> <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>          <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">r8</span>, [<span class="hljs-built_in">r13</span>+<span class="hljs-number">120h</span>]<br><span class="hljs-symbol">.text:</span>00000001C000A7E4 <span class="hljs-number">88</span> <span class="hljs-number">44</span> <span class="hljs-number">24</span> <span class="hljs-number">20</span>                   <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">byte</span> <span class="hljs-built_in">ptr</span> [<span class="hljs-built_in">rsp</span>+<span class="hljs-number">98h</span>+var_78], <span class="hljs-built_in">al</span><br><span class="hljs-symbol">.text:</span>00000001C000A7E8 E8 <span class="hljs-number">13</span> <span class="hljs-number">03</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>                <span class="hljs-keyword">call</span>    HidpDistributeInterruptReport<br><span class="hljs-symbol">.text:</span>00000001C000A7E8<br><span class="hljs-symbol">.text:</span>00000001C000A7ED<br><span class="hljs-symbol">.text:</span>00000001C000A7ED                               loc_1C000A7ED:                          <span class="hljs-comment">; CODE XREF: HidpInterruptReadComplete+2B2↑j</span><br><span class="hljs-symbol">.text:</span>00000001C000A7ED                                                                       <span class="hljs-comment">; HidpInterruptReadComplete+2BB↑j</span><br><span class="hljs-symbol">.text:</span>00000001C000A7ED 4C <span class="hljs-number">8D</span> <span class="hljs-number">2D</span> <span class="hljs-number">14</span> C8 <span class="hljs-number">01</span> <span class="hljs-number">00</span>          <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">r13</span>, WPP_RECORDER_INITIALIZED<br><span class="hljs-symbol">.text:</span>00000001C000A7ED<br><span class="hljs-symbol">.text:</span>00000001C000A7F4<br><span class="hljs-symbol">.text:</span>00000001C000A7F4                               loc_1C000A7F4:                          <span class="hljs-comment">; CODE XREF: HidpInterruptReadComplete+2E8↑j</span><br><span class="hljs-symbol">.text:</span>00000001C000A7F4                                                                       <span class="hljs-comment">; HidpInterruptReadComplete+31F↑j</span><br><span class="hljs-symbol">.text:</span>00000001C000A7F4                                                                       <span class="hljs-comment">; HidpInterruptReadComplete+43B↓j</span><br><span class="hljs-symbol">.text:</span>00000001C000A7F4                                                                       <span class="hljs-comment">; HidpInterruptReadComplete+44D↓j</span><br><span class="hljs-symbol">.text:</span>00000001C000A7F4                                                                       <span class="hljs-comment">; HidpInterruptReadComplete+483↓j</span><br><span class="hljs-symbol">.text:</span>00000001C000A7F4 <span class="hljs-number">48</span> <span class="hljs-number">63</span> C6                      <span class="hljs-keyword">movsxd</span>  <span class="hljs-built_in">rax</span>, <span class="hljs-built_in">esi</span><br><span class="hljs-symbol">.text:</span>00000001C000A7F7 2B EE                         <span class="hljs-keyword">sub</span>     <span class="hljs-built_in">ebp</span>, <span class="hljs-built_in">esi</span><br><span class="hljs-symbol">.text:</span>00000001C000A7F9 4C <span class="hljs-number">03</span> F8                      <span class="hljs-keyword">add</span>     <span class="hljs-built_in">r15</span>, <span class="hljs-built_in">rax</span><br><span class="hljs-symbol">.text:</span>00000001C000A7FC <span class="hljs-number">85</span> ED                         <span class="hljs-keyword">test</span>    <span class="hljs-built_in">ebp</span>, <span class="hljs-built_in">ebp</span><br><span class="hljs-symbol">.text:</span>00000001C000A7FE 0F 8F 5C FE FF FF             <span class="hljs-keyword">jg</span>      loc_1C000A660<br><br><br>USBXHCI!Bulk_Transfer_CompleteCancelable+<span class="hljs-number">0xc9</span>:<br><span class="hljs-symbol">.text:</span>00000001C000C1A8 <span class="hljs-number">48</span> 8B <span class="hljs-number">15</span> <span class="hljs-number">41</span> 5A <span class="hljs-number">05</span> <span class="hljs-number">00</span>          <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rdx</span>, <span class="hljs-built_in">cs</span>:WdfFunctions_01023<br><span class="hljs-symbol">.text:</span>00000001C000C1AF 8A D8                         <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">bl</span>, <span class="hljs-built_in">al</span><br><span class="hljs-symbol">.text:</span>00000001C000C1B1 <span class="hljs-number">44</span> 8B <span class="hljs-number">46</span> <span class="hljs-number">48</span>                   <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">r8d</span>, [<span class="hljs-built_in">rsi</span>+<span class="hljs-number">48h</span>]<br><span class="hljs-symbol">.text:</span>00000001C000C1B5 <span class="hljs-number">48</span> 8B <span class="hljs-number">0D</span> <span class="hljs-number">14</span> <span class="hljs-number">58</span> <span class="hljs-number">05</span> <span class="hljs-number">00</span>          <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rcx</span>, <span class="hljs-built_in">cs</span>:WdfDriverGlobals<br><span class="hljs-symbol">.text:</span>00000001C000C1BC <span class="hljs-number">48</span> 8B <span class="hljs-number">82</span> <span class="hljs-number">38</span> <span class="hljs-number">08</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>          <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rax</span>, [<span class="hljs-built_in">rdx</span>+<span class="hljs-number">838h</span>]<br><span class="hljs-symbol">.text:</span>00000001C000C1C3 <span class="hljs-number">48</span> 8B <span class="hljs-number">56</span> <span class="hljs-number">18</span>                   <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rdx</span>, [<span class="hljs-built_in">rsi</span>+<span class="hljs-number">18h</span>]<br><span class="hljs-symbol">.text:</span>00000001C000C1C7 FF <span class="hljs-number">15</span> CB B2 <span class="hljs-number">05</span> <span class="hljs-number">00</span>             <span class="hljs-keyword">call</span>    <span class="hljs-built_in">cs</span>:__guard_dispatch_icall_fptr  <span class="hljs-comment">; call WdfFunctions_01023[0x107]</span><br><span class="hljs-symbol">.text:</span>00000001C000C1C7<br><span class="hljs-symbol">.text:</span>00000001C000C1CD 8A CB                         <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">cl</span>, <span class="hljs-built_in">bl</span>                          <span class="hljs-comment">; NewIrql</span><br><span class="hljs-symbol">.text:</span>00000001C000C1CF <span class="hljs-number">48</span> FF <span class="hljs-number">15</span> BA AF <span class="hljs-number">05</span> <span class="hljs-number">00</span>          <span class="hljs-keyword">call</span>    <span class="hljs-built_in">cs</span>:__imp_KeLowerIrql<br><span class="hljs-symbol">.text:</span>00000001C000C1CF<br><br><br>USBXHCI!Bulk_ProcessTransferEventWithED1+<span class="hljs-number">0x1fd</span>:<br><span class="hljs-symbol">.text:</span>00000001C000C07F                               loc_1C000C07F:                          <span class="hljs-comment">; CODE XREF: Bulk_ProcessTransferEventWithED1+1E1↑j</span><br><span class="hljs-symbol">.text:</span>00000001C000C07F <span class="hljs-number">45</span> <span class="hljs-number">33</span> C9                      <span class="hljs-keyword">xor</span>     <span class="hljs-built_in">r9d</span>, <span class="hljs-built_in">r9d</span><br><span class="hljs-symbol">.text:</span>00000001C000C082 <span class="hljs-number">41</span> <span class="hljs-number">83</span> C8 FF                   <span class="hljs-keyword">or</span>      <span class="hljs-built_in">r8d</span>, <span class="hljs-number">0FFFFFFFFh</span><br><span class="hljs-symbol">.text:</span>00000001C000C086 <span class="hljs-number">48</span> 8B D3                      <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rdx</span>, <span class="hljs-built_in">rbx</span><br><span class="hljs-symbol">.text:</span>00000001C000C089 <span class="hljs-number">48</span> 8B CF                      <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rcx</span>, <span class="hljs-built_in">rdi</span><br><span class="hljs-symbol">.text:</span>00000001C000C08C E8 <span class="hljs-number">73</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>                <span class="hljs-keyword">call</span>    Bulk_Transfer_CompleteCancelable<br><br><br>USBXHCI!Bulk_EP_TransferEventHandler+<span class="hljs-number">0x10</span>:<br><span class="hljs-symbol">.text:</span>00000001C000BE70                               Bulk_EP_TransferEventHandler proc <span class="hljs-built_in">near</span>  <span class="hljs-comment">; DATA XREF: .rdata:00000001C00520A8↓o</span><br><span class="hljs-symbol">.text:</span>00000001C000BE70                                                                       <span class="hljs-comment">; .pdata:00000001C00628DC↓o</span><br><span class="hljs-symbol">.text:</span>00000001C000BE70 <span class="hljs-number">48</span> <span class="hljs-number">83</span> EC <span class="hljs-number">28</span>                   <span class="hljs-keyword">sub</span>     <span class="hljs-built_in">rsp</span>, <span class="hljs-number">28h</span><br><span class="hljs-symbol">.text:</span>00000001C000BE74 8B <span class="hljs-number">41</span> 0C                      <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">eax</span>, [<span class="hljs-built_in">rcx</span>+<span class="hljs-number">0Ch</span>]<br><span class="hljs-symbol">.text:</span>00000001C000BE77 A8 <span class="hljs-number">04</span>                         <span class="hljs-keyword">test</span>    <span class="hljs-built_in">al</span>, <span class="hljs-number">4</span><br><span class="hljs-symbol">.text:</span>00000001C000BE79 <span class="hljs-number">74</span> <span class="hljs-number">0B</span>                         <span class="hljs-keyword">jz</span>      short loc_1C000BE86<br><span class="hljs-symbol">.text:</span>00000001C000BE79<br><span class="hljs-symbol">.text:</span>00000001C000BE7B E8 <span class="hljs-number">14</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>                <span class="hljs-keyword">call</span>    Bulk_ProcessTransferEventWithED1<br><span class="hljs-symbol">.text:</span>00000001C000BE7B<br><span class="hljs-symbol">.text:</span>00000001C000BE80<br><span class="hljs-symbol">.text:</span>00000001C000BE80                               loc_1C000BE80:                          <span class="hljs-comment">; CODE XREF: Bulk_EP_TransferEventHandler+1B↓j</span><br><span class="hljs-symbol">.text:</span>00000001C000BE80 <span class="hljs-number">48</span> <span class="hljs-number">83</span> C4 <span class="hljs-number">28</span>                   <span class="hljs-keyword">add</span>     <span class="hljs-built_in">rsp</span>, <span class="hljs-number">28h</span><br><span class="hljs-symbol">.text:</span>00000001C000BE84 C3                            <span class="hljs-keyword">retn</span><br><br><br>USBXHCI!Endpoint_TransferEventHandler+<span class="hljs-number">0xb1</span>:<br><span class="hljs-symbol">.text:</span>00000001C00068E0 <span class="hljs-number">48</span> 8B <span class="hljs-number">42</span> <span class="hljs-number">20</span>                   <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rax</span>, [<span class="hljs-built_in">rdx</span>+<span class="hljs-number">20h</span>]<br><span class="hljs-symbol">.text:</span>00000001C00068E4 <span class="hljs-number">48</span> 8B CF                      <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rcx</span>, <span class="hljs-built_in">rdi</span><br><span class="hljs-symbol">.text:</span>00000001C00068E7 <span class="hljs-number">48</span> 8B <span class="hljs-number">40</span> <span class="hljs-number">58</span>                   <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rax</span>, [<span class="hljs-built_in">rax</span>+<span class="hljs-number">58h</span>]<br><span class="hljs-symbol">.text:</span>00000001C00068EB FF <span class="hljs-number">15</span> A7 <span class="hljs-number">0B</span> <span class="hljs-number">06</span> <span class="hljs-number">00</span>             <span class="hljs-keyword">call</span>    <span class="hljs-built_in">cs</span>:__guard_dispatch_icall_fptr<br><span class="hljs-symbol">.text:</span>00000001C00068EB<br><span class="hljs-symbol">.text:</span>00000001C00068F1<br><span class="hljs-symbol">.text:</span>00000001C00068F1                               loc_1C00068F1:                          <span class="hljs-comment">; CODE XREF: Endpoint_TransferEventHandler+1C693↓j</span><br><span class="hljs-symbol">.text:</span>00000001C00068F1                                                                       <span class="hljs-comment">; Endpoint_TransferEventHandler+1C6AB↓j</span><br><span class="hljs-symbol">.text:</span>00000001C00068F1                                                                       <span class="hljs-comment">; Endpoint_TransferEventHandler+1C6B6↓j</span><br><span class="hljs-symbol">.text:</span>00000001C00068F1                                                                       <span class="hljs-comment">; Endpoint_TransferEventHandler+1C6CD↓j</span><br><span class="hljs-symbol">.text:</span>00000001C00068F1                                                                       <span class="hljs-comment">; Endpoint_TransferEventHandler+1C6D8↓j</span><br><span class="hljs-symbol">.text:</span>00000001C00068F1                                                                       <span class="hljs-comment">; Endpoint_TransferEventHandler+1C81C↓j</span><br><span class="hljs-symbol">.text:</span>00000001C00068F1                                                                       <span class="hljs-comment">; Endpoint_TransferEventHandler+1CBE2↓j</span><br><span class="hljs-symbol">.text:</span>00000001C00068F1 <span class="hljs-number">48</span> 8B <span class="hljs-number">74</span> <span class="hljs-number">24</span> <span class="hljs-number">70</span>                <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rsi</span>, [<span class="hljs-built_in">rsp</span>+<span class="hljs-number">58h</span>+arg_10]<br><span class="hljs-symbol">.text:</span>00000001C00068F1<br><span class="hljs-symbol">.text:</span>00000001C00068F6<br><span class="hljs-symbol">.text:</span>00000001C00068F6                               loc_1C00068F6:                          <span class="hljs-comment">; CODE XREF: Endpoint_TransferEventHandler+1C647↓j</span><br><span class="hljs-symbol">.text:</span>00000001C00068F6                                                                       <span class="hljs-comment">; Endpoint_TransferEventHandler+1C683↓j</span><br><span class="hljs-symbol">.text:</span>00000001C00068F6                                                                       <span class="hljs-comment">; DATA XREF: .pdata:00000001C0062414↓o</span><br><span class="hljs-symbol">.text:</span>00000001C00068F6                                                                       <span class="hljs-comment">; .pdata:00000001C0062420↓o</span><br><span class="hljs-symbol">.text:</span>00000001C00068F6 <span class="hljs-number">48</span> 8B 5C <span class="hljs-number">24</span> <span class="hljs-number">78</span>                <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rbx</span>, [<span class="hljs-built_in">rsp</span>+<span class="hljs-number">58h</span>+arg_18]<br><span class="hljs-symbol">.text:</span>00000001C00068FB <span class="hljs-number">48</span> <span class="hljs-number">83</span> C4 <span class="hljs-number">50</span>                   <span class="hljs-keyword">add</span>     <span class="hljs-built_in">rsp</span>, <span class="hljs-number">50h</span><br><span class="hljs-symbol">.text:</span>00000001C00068FF 5F                            <span class="hljs-keyword">pop</span>     <span class="hljs-built_in">rdi</span><br><span class="hljs-symbol">.text:</span>00000001C0006900 C3                            <span class="hljs-keyword">retn</span><br><br><br>USBXHCI!Interrupter_DeferredWorkProcessor+<span class="hljs-number">0x315</span>:<br><span class="hljs-symbol">.text:</span>00000001C000641C <span class="hljs-number">48</span> <span class="hljs-number">8D</span> <span class="hljs-number">4D</span> DF                   <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rcx</span>, [<span class="hljs-built_in">rbp</span>+<span class="hljs-number">57h</span>+var_78]<br><span class="hljs-symbol">.text:</span>00000001C0006420 E8 <span class="hljs-number">1B</span> <span class="hljs-number">04</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>                <span class="hljs-keyword">call</span>    Endpoint_TransferEventHandler<br><span class="hljs-symbol">.text:</span>00000001C0006420<br><span class="hljs-symbol">.text:</span>00000001C0006425<br><span class="hljs-symbol">.text:</span>00000001C0006425                               loc_1C0006425:                          <span class="hljs-comment">; CODE XREF: Interrupter_DeferredWorkProcessor+1C77F↓j</span><br><span class="hljs-symbol">.text:</span>00000001C0006425                                                                       <span class="hljs-comment">; Interrupter_DeferredWorkProcessor+1C7DE↓j</span><br><span class="hljs-symbol">.text:</span>00000001C0006425                                                                       <span class="hljs-comment">; Interrupter_DeferredWorkProcessor+1C7EB↓j</span><br><span class="hljs-symbol">.text:</span>00000001C0006425                                                                       <span class="hljs-comment">; Interrupter_DeferredWorkProcessor+1C846↓j</span><br><span class="hljs-symbol">.text:</span>00000001C0006425 8B <span class="hljs-number">5D</span> <span class="hljs-built_in">DB</span>                      <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">ebx</span>, [<span class="hljs-built_in">rbp</span>+<span class="hljs-number">57h</span>+var_7C]<br><span class="hljs-symbol"></span><br><span class="hljs-symbol"></span><br><span class="hljs-symbol"></span><br><span class="hljs-symbol">.text:</span>00000001C00060F0                               Interrupter_WdfEvtInterruptDpc proc <span class="hljs-built_in">near</span><br><span class="hljs-symbol">.text:</span>00000001C00060F0                                                                       <span class="hljs-comment">; DATA XREF: .pdata:00000001C00623E4↓o</span><br><span class="hljs-symbol">.text:</span>00000001C00060F0                                                                       <span class="hljs-comment">; Interrupter_CreateInterrupter+C3↓o</span><br><span class="hljs-symbol">.text:</span>00000001C00060F0 <span class="hljs-number">48</span> <span class="hljs-number">83</span> EC <span class="hljs-number">28</span>                   <span class="hljs-keyword">sub</span>     <span class="hljs-built_in">rsp</span>, <span class="hljs-number">28h</span><br><span class="hljs-symbol">.text:</span>00000001C00060F4 <span class="hljs-number">45</span> <span class="hljs-number">33</span> C0                      <span class="hljs-keyword">xor</span>     <span class="hljs-built_in">r8d</span>, <span class="hljs-built_in">r8d</span><br><span class="hljs-symbol">.text:</span>00000001C00060F7 E8 <span class="hljs-number">14</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>                <span class="hljs-keyword">call</span>    Interrupter_DeferredWorkProcessor<br><span class="hljs-symbol">.text:</span>00000001C00060F7<br><span class="hljs-symbol">.text:</span>00000001C00060FC <span class="hljs-number">48</span> <span class="hljs-number">83</span> C4 <span class="hljs-number">28</span>                   <span class="hljs-keyword">add</span>     <span class="hljs-built_in">rsp</span>, <span class="hljs-number">28h</span><br><span class="hljs-symbol">.text:</span>00000001C0006100 C3                            <span class="hljs-keyword">retn</span><br><span class="hljs-symbol">.text:</span>00000001C0006100<br><span class="hljs-symbol">.text:</span>00000001C0006100                               <span class="hljs-comment">; ---------------------------------------------------------------------------</span><br><span class="hljs-symbol">.text:</span>00000001C0006101 CC                            <span class="hljs-built_in">db</span> <span class="hljs-number">0CCh</span><br><span class="hljs-symbol">.text:</span>00000001C0006101                               Interrupter_WdfEvtInterruptDpc endp<br></code></pre></td></tr></table></figure>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%86%85%E6%A0%B8/" class="category-chain-item">内核</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%88%86%E9%A1%B5/" class="print-no-link">#分页</a>
+      
+        <a href="/tags/%E5%86%85%E6%A0%B8/" class="print-no-link">#内核</a>
+      
+        <a href="/tags/%E9%A9%B1%E5%8A%A8/" class="print-no-link">#驱动</a>
+      
+        <a href="/tags/%E9%94%AE%E9%BC%A0/" class="print-no-link">#键鼠</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>HID键鼠协议相关</div>
+      <div>https://rogxo.github.io/2023/08/25/2023-08-25-HID键鼠协议相关/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Rogxo</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年8月25日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              CC BY-NC-SA 4.0
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/08/23/2023-08-23-PS_2%E9%94%AE%E9%BC%A0%E5%8D%8F%E8%AE%AE%E7%9B%B8%E5%85%B3/" title="PS_2键鼠协议相关">
+                        <span class="hidden-mobile">PS_2键鼠协议相关</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/openkounter.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
