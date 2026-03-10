@@ -51,11 +51,11 @@
     
     <tags>
       
-      <tag>汇编</tag>
+      <tag>逆向</tag>
       
       <tag>内核</tag>
       
-      <tag>逆向</tag>
+      <tag>汇编</tag>
       
       <tag>驱动</tag>
       
@@ -86,9 +86,9 @@
       
       <tag>分页</tag>
       
-      <tag>汇编</tag>
-      
       <tag>内核</tag>
+      
+      <tag>汇编</tag>
       
       <tag>驱动</tag>
       
@@ -119,9 +119,9 @@
       
       <tag>编译</tag>
       
-      <tag>汇编</tag>
-      
       <tag>内核</tag>
+      
+      <tag>汇编</tag>
       
       <tag>Android</tag>
       
@@ -175,9 +175,9 @@
       
       <tag>编译</tag>
       
-      <tag>内核</tag>
-      
       <tag>逆向</tag>
+      
+      <tag>内核</tag>
       
       <tag>Android</tag>
       
@@ -235,34 +235,9 @@
       
       <tag>分页</tag>
       
-      <tag>调试</tag>
-      
       <tag>内核</tag>
       
-    </tags>
-    
-  </entry>
-  
-  
-  
-  <entry>
-    <title>Plot</title>
-    <link href="/2023/03/26/2023-03-26-Plot/"/>
-    <url>/2023/03/26/2023-03-26-Plot/</url>
-    
-    <content type="html"><![CDATA[<p><img src="/images/3e065196f4d04c8831817781f17150a6.png" alt="3e065196f4d04c8831817781f17150a6.png"></p>]]></content>
-    
-    
-    <categories>
-      
-      <category>工具</category>
-      
-    </categories>
-    
-    
-    <tags>
-      
-      <tag>技术</tag>
+      <tag>调试</tag>
       
     </tags>
     
@@ -341,9 +316,9 @@
       
       <tag>编译</tag>
       
-      <tag>汇编</tag>
-      
       <tag>内核</tag>
+      
+      <tag>汇编</tag>
       
       <tag>驱动</tag>
       
@@ -361,31 +336,6 @@
     <url>/2022/09/20/2022-09-20-UE4%20FName%20&amp;%20GObject/</url>
     
     <content type="html"><![CDATA[<p>FName就是NamePoolData<br>GObject就是GUObjectArray</p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><code class="hljs C">__int64 __fastcall <span class="hljs-title function_">FName::GetPlainNameString</span><span class="hljs-params">(_DWORD *a1, __int64 a2)</span><br>&#123;<br>  __int64 v3; <span class="hljs-comment">// rbx</span><br>  RTL_SRWLOCK *v4; <span class="hljs-comment">// r8</span><br>  <span class="hljs-type">int</span> v6; <span class="hljs-comment">// [rsp+34h] [rbp+Ch]</span><br><br>  v3 = HIWORD(*a1);<br>  v6 = (<span class="hljs-type">unsigned</span> __int16)*a1;<br>  <span class="hljs-keyword">if</span> ( byte_148D8736C )<br>  &#123;<br>    v4 = &amp;stru_148D9B9C0;<br>  &#125;<br>  <span class="hljs-keyword">else</span><br>  &#123;<br>    v4 = (RTL_SRWLOCK *)FNamePool::FNamePool((FNamePool *)&amp;stru_148D9B9C0);<span class="hljs-comment">//NamePoolData</span><br>    byte_148D8736C = <span class="hljs-number">1</span>;<br>  &#125;<br>  FNameEntry::GetPlainNameString((<span class="hljs-type">char</span> *)v4[v3 + <span class="hljs-number">2</span>].Ptr + (<span class="hljs-type">unsigned</span> <span class="hljs-type">int</span>)(<span class="hljs-number">2</span> * v6), a2);<br>  <span class="hljs-keyword">return</span> a2;<br>&#125;<br><br><br><span class="hljs-type">void</span> <span class="hljs-title function_">UObjectBaseInit</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> v0; <span class="hljs-comment">// ecx</span><br>  <span class="hljs-type">char</span> v1; <span class="hljs-comment">// bl</span><br>  ......<br><br>  <span class="hljs-keyword">if</span> ( *((<span class="hljs-type">int</span> *)CpuChannel + <span class="hljs-number">6</span>) &lt; <span class="hljs-number">0</span> )<br>  &#123;<br>    v0 = dword_148DBD114;<br>  &#125;<br>  <span class="hljs-keyword">else</span><br>  &#123;<br>    ......<br>  &#125;  <br>  ......<br><br>  GUObjectAllocator = v13;<br>  qword_148DBCD48 = (__int64)FMemory::MallocPersistentAuxiliary(v13, <span class="hljs-number">0</span>);<br>  qword_148DBCD50 = qword_148DBCD48;<br>  qword_148DBCD58 = qword_148DBCD48;<br>  FUObjectArray::AllocateObjectPool((FUObjectArray *)&amp;GUObjectArray, v14, v12, v11);<span class="hljs-comment">//An instance of FUObjectArray</span><br>  InitAsyncThread();<br>  byte_148DBCFC8 = <span class="hljs-number">1</span>;<br>  sub_142058840();<br>  FScopedBootTiming::~FScopedBootTiming((FScopedBootTiming *)v10);<br>  <span class="hljs-keyword">if</span> ( v1 )<br>    FCpuProfilerTrace::OutputEndEvent();<br>&#125;<br></code></pre></td></tr></table></figure><p>GUObjectArray是FUObjectArray的一个实例化对象 <code>GetPlainNameString</code><br>其结构为</p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">COREUOBJECT_API</span> <span class="hljs-title">FUObjectArray</span></span><br><span class="hljs-class">&#123;</span><br>public:<br>    ......<br>private:<br>    <span class="hljs-keyword">typedef</span> FChunkedFixedUObjectArray TUObjectArray;<br>    int32 ObjFirstGCIndex;<br>    int32 ObjLastNonGCIndex;<br>    int32 MaxObjectsNotConsideredByGC;<br>    <span class="hljs-type">bool</span> OpenForDisregardForGC;<br>    <span class="hljs-comment">/** Array of all live objects.*/</span><br>    TUObjectArray ObjObjects;<br>    FCriticalSection ObjObjectsCritical;<br>    TLockFreePointerListUnordered&lt;int32, PLATFORM_CACHE_LINE_SIZE&gt; ObjAvailableList;<br><span class="hljs-meta">#<span class="hljs-keyword">if</span> UE_GC_TRACK_OBJ_AVAILABLE</span><br>    FThreadSafeCounter ObjAvailableCount;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>&#125;;<br></code></pre></td></tr></table></figure><p>NamePoolData是FNamePool的一个实例化对象<br>其结构为</p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">FNameEntryAllocator</span>&#123;</span><br>    mutable PVOID Lock;<br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> CurrentBlock;<br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> CurrentByCursor;<br>    PVOID Blocks[FNameMaxBlocks];<br>&#125;<br><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">FNamePool</span>&#123;</span><br>    FNameEntryAllocator Entires;<br>    ...<br>&#125;<br><br><span class="hljs-comment">//这里Blocks，可以理解为每个NamePool的一个块。在该块中，每个条目由FNameEntry构成</span><br><br><span class="hljs-comment">//FNameEntry具有以下结构。</span><br><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">FNameEntryHeader</span> &#123;</span><br>    USHORT bIsWide : <span class="hljs-number">1</span>;<br>    USHORT Len : <span class="hljs-number">15</span>;<br>&#125;;<br><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">FNameEntry</span> &#123;</span><br>    FNameEntryHeader Header;<br>    <span class="hljs-class"><span class="hljs-keyword">union</span></span><br><span class="hljs-class">    &#123;</span><br>        <span class="hljs-type">char</span>AnsiName[NAME_SIZE];<br>        <span class="hljs-type">wchar_t</span>WideName[NAME_SIZE];<br>    &#125;;<br>&#125;<br></code></pre></td></tr></table></figure>]]></content>
-    
-    
-    <categories>
-      
-      <category>游戏安全</category>
-      
-    </categories>
-    
-    
-    <tags>
-      
-      <tag>UE4</tag>
-      
-    </tags>
-    
-  </entry>
-  
-  
-  
-  <entry>
-    <title>UE4引擎结构</title>
-    <link href="/2022/09/20/2022-09-20-UE4%E5%BC%95%E6%93%8E%E7%BB%93%E6%9E%84/"/>
-    <url>/2022/09/20/2022-09-20-UE4%E5%BC%95%E6%93%8E%E7%BB%93%E6%9E%84/</url>
-    
-    <content type="html"><![CDATA[<p>![KS9}OHMF6N%(T_T}Y7G<code>ETY.png](/images/KS9}OHMF6N%%28T_T}Y7G</code>ETY.png)</p><p><img src="/images/596B46E2F090D1B39F717AD3586DCFB6.png" alt="596B46E2F090D1B39F717AD3586DCFB6.png"><img src="/images/_K%25V76G8G3W0)3IGLRD01%7D5.png" alt="_K%V76G8G3W0)3IGLRD01}5.png"></p>]]></content>
     
     
     <categories>
@@ -501,9 +451,9 @@
     
     <tags>
       
-      <tag>汇编</tag>
-      
       <tag>内核</tag>
+      
+      <tag>汇编</tag>
       
     </tags>
     
@@ -691,31 +641,6 @@
   
   
   <entry>
-    <title>C++友元运算符重载</title>
-    <link href="/2021/12/01/2021-12-01-C++%E5%8F%8B%E5%85%83%E8%BF%90%E7%AE%97%E7%AC%A6%E9%87%8D%E8%BD%BD/"/>
-    <url>/2021/12/01/2021-12-01-C++%E5%8F%8B%E5%85%83%E8%BF%90%E7%AE%97%E7%AC%A6%E9%87%8D%E8%BD%BD/</url>
-    
-    <content type="html"><![CDATA[<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;stdio.h&gt;</span></span><br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">CTestOperator</span><br>&#123;<br><span class="hljs-keyword">public</span>:<br>    <br>    <span class="hljs-built_in">CTestOperator</span>();<br>    <span class="hljs-keyword">friend</span> CTestOperator <span class="hljs-keyword">operator</span>++(CTestOperator&amp; t,<span class="hljs-type">int</span> a);<br>    <span class="hljs-function"><span class="hljs-keyword">friend</span> <span class="hljs-type">void</span> <span class="hljs-title">Print</span><span class="hljs-params">(CTestOperator&amp; t)</span></span>;<br><br><span class="hljs-keyword">private</span>:<br>    <span class="hljs-type">int</span> x;<br>    <span class="hljs-type">int</span> y;<br>    <br>&#125;;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Print</span><span class="hljs-params">(CTestOperator&amp; t)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d\t%d\n&quot;</span>, t.x, t.y);<br>&#125;<br><br>CTestOperator::<span class="hljs-built_in">CTestOperator</span>()<br>&#123;<br>    <span class="hljs-keyword">this</span>-&gt;x = <span class="hljs-number">10</span>;<br>    <span class="hljs-keyword">this</span>-&gt;y = <span class="hljs-number">20</span>;<br>&#125;<br><br>CTestOperator <span class="hljs-keyword">operator</span>++(CTestOperator&amp; t,<span class="hljs-type">int</span> a)<br>&#123;<br>    t.x++;<br>    t.y++;<br>    <span class="hljs-keyword">return</span> t;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    CTestOperator t;<br>    <span class="hljs-built_in">Print</span>(t);<br>    t++;<br>    <span class="hljs-built_in">Print</span>(t);<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">test</span>();<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>]]></content>
-    
-    
-    <categories>
-      
-      <category>编程</category>
-      
-    </categories>
-    
-    
-    <tags>
-      
-      <tag>C++</tag>
-      
-    </tags>
-    
-  </entry>
-  
-  
-  
-  <entry>
     <title>C++多态本质-虚表</title>
     <link href="/2021/12/01/2021-12-01-C++%E5%A4%9A%E6%80%81%E6%9C%AC%E8%B4%A8-%E8%99%9A%E8%A1%A8/"/>
     <url>/2021/12/01/2021-12-01-C++%E5%A4%9A%E6%80%81%E6%9C%AC%E8%B4%A8-%E8%99%9A%E8%A1%A8/</url>
@@ -741,36 +666,11 @@
   
   
   <entry>
-    <title>C++类本质</title>
-    <link href="/2021/12/01/2021-12-01-C++%E7%B1%BB%E6%9C%AC%E8%B4%A8/"/>
-    <url>/2021/12/01/2021-12-01-C++%E7%B1%BB%E6%9C%AC%E8%B4%A8/</url>
+    <title>C++友元运算符重载</title>
+    <link href="/2021/12/01/2021-12-01-C++%E5%8F%8B%E5%85%83%E8%BF%90%E7%AE%97%E7%AC%A6%E9%87%8D%E8%BD%BD/"/>
+    <url>/2021/12/01/2021-12-01-C++%E5%8F%8B%E5%85%83%E8%BF%90%E7%AE%97%E7%AC%A6%E9%87%8D%E8%BD%BD/</url>
     
-    <content type="html"><![CDATA[<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;windows.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;stdio.h&gt;</span></span><br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Test</span><br>&#123;<br><span class="hljs-keyword">public</span>:<br>    <span class="hljs-type">int</span> a;<br>    <span class="hljs-type">int</span> b;<br>    <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">add</span><span class="hljs-params">()</span></span><br><span class="hljs-function">    </span>&#123;<br>        <span class="hljs-keyword">return</span> a + b;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">sub</span><span class="hljs-params">()</span></span><br><span class="hljs-function">    </span>&#123;<br>        <span class="hljs-keyword">return</span> a - b;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">mul</span><span class="hljs-params">()</span></span><br><span class="hljs-function">    </span>&#123;<br>        <span class="hljs-keyword">return</span> a * b;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">div</span><span class="hljs-params">()</span></span><br><span class="hljs-function">    </span>&#123;<br>        <span class="hljs-keyword">return</span> a / b;<br>    &#125;<br><br>    <span class="hljs-built_in">Test</span>()<br>    &#123;<br>    &#125;<br><br>    <span class="hljs-built_in">Test</span>(<span class="hljs-type">int</span> a,<span class="hljs-type">int</span> b)<br>    &#123;<br>        <span class="hljs-keyword">this</span>-&gt;a = a;<br>        <span class="hljs-keyword">this</span>-&gt;b = b;<br>    &#125;<br><br>    ~<span class="hljs-built_in">Test</span>()<br>    &#123;<br>        <span class="hljs-keyword">this</span>-&gt;a = <span class="hljs-number">0</span>;<br>        <span class="hljs-keyword">this</span>-&gt;b = <span class="hljs-number">0</span>;<br>    &#125;<br>&#125;;<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">SubTest</span>:Test<br>&#123;<br><span class="hljs-keyword">public</span>:<br>    <span class="hljs-type">int</span> c;<br>    <span class="hljs-type">int</span> d;<br><br>    <span class="hljs-built_in">SubTest</span>(<span class="hljs-type">int</span> a, <span class="hljs-type">int</span> b, <span class="hljs-type">int</span> c, <span class="hljs-type">int</span> d)<br>    &#123;<br>        <span class="hljs-keyword">this</span>-&gt;a = a;<br>        <span class="hljs-keyword">this</span>-&gt;b = b;<br>        <span class="hljs-keyword">this</span>-&gt;c = c;<br>        <span class="hljs-keyword">this</span>-&gt;d = d;<br>    &#125;<br>&#125;;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-comment">//Test t(1,2);</span><br>    <span class="hljs-function">SubTest <span class="hljs-title">t</span><span class="hljs-params">(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">4</span>)</span></span>;<br>    <span class="hljs-comment">//t.add(); </span><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">类实例化出来的对象一般在创建它的函数栈帧的缓冲区(ebp-4,ebp-8,ebp-C)中</span><br><span class="hljs-comment">调用成员方法(包括构造器)时会先将参数PUSH进栈再lea ecx,对象地址(一般为该层函数栈缓冲区ebp-8中)；这叫做__thiscall(内平栈，从右到左堆栈传参(32位)，最后传对象指针(this指针，通过ecx传，保存在成员函数栈缓冲区ebp-8处))</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">*/</span><br></code></pre></td></tr></table></figure>]]></content>
-    
-    
-    <categories>
-      
-      <category>编程</category>
-      
-    </categories>
-    
-    
-    <tags>
-      
-      <tag>C++</tag>
-      
-    </tags>
-    
-  </entry>
-  
-  
-  
-  <entry>
-    <title>C++引用本质</title>
-    <link href="/2021/12/01/2021-12-01-C++%E5%BC%95%E7%94%A8%E6%9C%AC%E8%B4%A8/"/>
-    <url>/2021/12/01/2021-12-01-C++%E5%BC%95%E7%94%A8%E6%9C%AC%E8%B4%A8/</url>
-    
-    <content type="html"><![CDATA[<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;stdio.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">change1</span><span class="hljs-params">(<span class="hljs-type">int</span> *pa)</span></span><br><span class="hljs-function"></span>&#123;<br>    *pa = <span class="hljs-number">22</span>;<br>    pa = (<span class="hljs-type">int</span>*)<span class="hljs-number">0x11111111</span>;<span class="hljs-comment">//指针类型可以随便改指针变量的值</span><br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">change2</span><span class="hljs-params">(<span class="hljs-type">int</span> &amp;a)</span></span><br><span class="hljs-function"></span>&#123;<br>    a = <span class="hljs-number">22</span>;<br>    __asm<br>    &#123;<br>        mov eax,<span class="hljs-number">11111111</span>h<br>        mov [ebp<span class="hljs-number">+8</span>],eax<span class="hljs-comment">//引用类型不可更改引用的位置，通过内联汇编强行改掉，实际反汇编跟指针类型一样，只不过被编译器限制了</span><br>    &#125;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test1</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-type">int</span> a = <span class="hljs-number">10</span>;<br>    <span class="hljs-built_in">change1</span>(&amp;a);<br>    <br>    <span class="hljs-type">int</span> tmp = <span class="hljs-number">0</span>;<br>    __asm<br>    &#123;<br>        mov eax,[esp<span class="hljs-number">-4</span>];<br>        mov tmp,eax<span class="hljs-comment">//获取上层函数栈中“指针”的值</span><br>    &#125;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%x\n&quot;</span>, tmp);<br><br>    tmp = <span class="hljs-number">0</span>;<br><br>    <span class="hljs-built_in">change2</span>(a);<br>    __asm<br>    &#123;<br>        mov eax,[esp<span class="hljs-number">-4</span>]<br>        mov tmp,eax<span class="hljs-comment">//获取上层函数栈中“指针”的值</span><br>    &#125;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%x\n&quot;</span>, tmp);<br><br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">test1</span>();<br>&#125;<br></code></pre></td></tr></table></figure>]]></content>
+    <content type="html"><![CDATA[<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;stdio.h&gt;</span></span><br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">CTestOperator</span><br>&#123;<br><span class="hljs-keyword">public</span>:<br>    <br>    <span class="hljs-built_in">CTestOperator</span>();<br>    <span class="hljs-keyword">friend</span> CTestOperator <span class="hljs-keyword">operator</span>++(CTestOperator&amp; t,<span class="hljs-type">int</span> a);<br>    <span class="hljs-function"><span class="hljs-keyword">friend</span> <span class="hljs-type">void</span> <span class="hljs-title">Print</span><span class="hljs-params">(CTestOperator&amp; t)</span></span>;<br><br><span class="hljs-keyword">private</span>:<br>    <span class="hljs-type">int</span> x;<br>    <span class="hljs-type">int</span> y;<br>    <br>&#125;;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Print</span><span class="hljs-params">(CTestOperator&amp; t)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d\t%d\n&quot;</span>, t.x, t.y);<br>&#125;<br><br>CTestOperator::<span class="hljs-built_in">CTestOperator</span>()<br>&#123;<br>    <span class="hljs-keyword">this</span>-&gt;x = <span class="hljs-number">10</span>;<br>    <span class="hljs-keyword">this</span>-&gt;y = <span class="hljs-number">20</span>;<br>&#125;<br><br>CTestOperator <span class="hljs-keyword">operator</span>++(CTestOperator&amp; t,<span class="hljs-type">int</span> a)<br>&#123;<br>    t.x++;<br>    t.y++;<br>    <span class="hljs-keyword">return</span> t;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    CTestOperator t;<br>    <span class="hljs-built_in">Print</span>(t);<br>    t++;<br>    <span class="hljs-built_in">Print</span>(t);<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">test</span>();<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>]]></content>
     
     
     <categories>
@@ -783,8 +683,6 @@
     <tags>
       
       <tag>C++</tag>
-      
-      <tag>编译</tag>
       
     </tags>
     
@@ -820,11 +718,11 @@
   
   
   <entry>
-    <title>C指针最典型例子</title>
-    <link href="/2020/12/01/2020-12-01-C%E6%8C%87%E9%92%88%E6%9C%80%E5%85%B8%E5%9E%8B%E4%BE%8B%E5%AD%90/"/>
-    <url>/2020/12/01/2020-12-01-C%E6%8C%87%E9%92%88%E6%9C%80%E5%85%B8%E5%9E%8B%E4%BE%8B%E5%AD%90/</url>
+    <title>C++引用本质</title>
+    <link href="/2021/12/01/2021-12-01-C++%E5%BC%95%E7%94%A8%E6%9C%AC%E8%B4%A8/"/>
+    <url>/2021/12/01/2021-12-01-C++%E5%BC%95%E7%94%A8%E6%9C%AC%E8%B4%A8/</url>
     
-    <content type="html"><![CDATA[<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;windows.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;stdio.h&gt;</span></span><br><br><span class="hljs-type">void</span> <span class="hljs-title function_">Msg</span><span class="hljs-params">()</span><br>&#123;<br>    <span class="hljs-comment">//MessageBoxA(0,0,0,0);</span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;I was called!&quot;</span>);<br>&#125;<br><br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span><br>&#123;<br>    <span class="hljs-type">int</span> a = <span class="hljs-number">0</span>;<br>    <span class="hljs-type">int</span>* p = &amp;a;<br>    p = p + <span class="hljs-number">4</span>;<br>    *p = (<span class="hljs-type">int</span>)Msg;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>]]></content>
+    <content type="html"><![CDATA[<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;stdio.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">change1</span><span class="hljs-params">(<span class="hljs-type">int</span> *pa)</span></span><br><span class="hljs-function"></span>&#123;<br>    *pa = <span class="hljs-number">22</span>;<br>    pa = (<span class="hljs-type">int</span>*)<span class="hljs-number">0x11111111</span>;<span class="hljs-comment">//指针类型可以随便改指针变量的值</span><br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">change2</span><span class="hljs-params">(<span class="hljs-type">int</span> &amp;a)</span></span><br><span class="hljs-function"></span>&#123;<br>    a = <span class="hljs-number">22</span>;<br>    __asm<br>    &#123;<br>        mov eax,<span class="hljs-number">11111111</span>h<br>        mov [ebp<span class="hljs-number">+8</span>],eax<span class="hljs-comment">//引用类型不可更改引用的位置，通过内联汇编强行改掉，实际反汇编跟指针类型一样，只不过被编译器限制了</span><br>    &#125;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test1</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-type">int</span> a = <span class="hljs-number">10</span>;<br>    <span class="hljs-built_in">change1</span>(&amp;a);<br>    <br>    <span class="hljs-type">int</span> tmp = <span class="hljs-number">0</span>;<br>    __asm<br>    &#123;<br>        mov eax,[esp<span class="hljs-number">-4</span>];<br>        mov tmp,eax<span class="hljs-comment">//获取上层函数栈中“指针”的值</span><br>    &#125;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%x\n&quot;</span>, tmp);<br><br>    tmp = <span class="hljs-number">0</span>;<br><br>    <span class="hljs-built_in">change2</span>(a);<br>    __asm<br>    &#123;<br>        mov eax,[esp<span class="hljs-number">-4</span>]<br>        mov tmp,eax<span class="hljs-comment">//获取上层函数栈中“指针”的值</span><br>    &#125;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%x\n&quot;</span>, tmp);<br><br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">test1</span>();<br>&#125;<br></code></pre></td></tr></table></figure>]]></content>
     
     
     <categories>
@@ -836,7 +734,34 @@
     
     <tags>
       
-      <tag>技术</tag>
+      <tag>C++</tag>
+      
+      <tag>编译</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>C++类本质</title>
+    <link href="/2021/12/01/2021-12-01-C++%E7%B1%BB%E6%9C%AC%E8%B4%A8/"/>
+    <url>/2021/12/01/2021-12-01-C++%E7%B1%BB%E6%9C%AC%E8%B4%A8/</url>
+    
+    <content type="html"><![CDATA[<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;windows.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;stdio.h&gt;</span></span><br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Test</span><br>&#123;<br><span class="hljs-keyword">public</span>:<br>    <span class="hljs-type">int</span> a;<br>    <span class="hljs-type">int</span> b;<br>    <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">add</span><span class="hljs-params">()</span></span><br><span class="hljs-function">    </span>&#123;<br>        <span class="hljs-keyword">return</span> a + b;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">sub</span><span class="hljs-params">()</span></span><br><span class="hljs-function">    </span>&#123;<br>        <span class="hljs-keyword">return</span> a - b;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">mul</span><span class="hljs-params">()</span></span><br><span class="hljs-function">    </span>&#123;<br>        <span class="hljs-keyword">return</span> a * b;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">div</span><span class="hljs-params">()</span></span><br><span class="hljs-function">    </span>&#123;<br>        <span class="hljs-keyword">return</span> a / b;<br>    &#125;<br><br>    <span class="hljs-built_in">Test</span>()<br>    &#123;<br>    &#125;<br><br>    <span class="hljs-built_in">Test</span>(<span class="hljs-type">int</span> a,<span class="hljs-type">int</span> b)<br>    &#123;<br>        <span class="hljs-keyword">this</span>-&gt;a = a;<br>        <span class="hljs-keyword">this</span>-&gt;b = b;<br>    &#125;<br><br>    ~<span class="hljs-built_in">Test</span>()<br>    &#123;<br>        <span class="hljs-keyword">this</span>-&gt;a = <span class="hljs-number">0</span>;<br>        <span class="hljs-keyword">this</span>-&gt;b = <span class="hljs-number">0</span>;<br>    &#125;<br>&#125;;<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">SubTest</span>:Test<br>&#123;<br><span class="hljs-keyword">public</span>:<br>    <span class="hljs-type">int</span> c;<br>    <span class="hljs-type">int</span> d;<br><br>    <span class="hljs-built_in">SubTest</span>(<span class="hljs-type">int</span> a, <span class="hljs-type">int</span> b, <span class="hljs-type">int</span> c, <span class="hljs-type">int</span> d)<br>    &#123;<br>        <span class="hljs-keyword">this</span>-&gt;a = a;<br>        <span class="hljs-keyword">this</span>-&gt;b = b;<br>        <span class="hljs-keyword">this</span>-&gt;c = c;<br>        <span class="hljs-keyword">this</span>-&gt;d = d;<br>    &#125;<br>&#125;;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-comment">//Test t(1,2);</span><br>    <span class="hljs-function">SubTest <span class="hljs-title">t</span><span class="hljs-params">(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">4</span>)</span></span>;<br>    <span class="hljs-comment">//t.add(); </span><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">类实例化出来的对象一般在创建它的函数栈帧的缓冲区(ebp-4,ebp-8,ebp-C)中</span><br><span class="hljs-comment">调用成员方法(包括构造器)时会先将参数PUSH进栈再lea ecx,对象地址(一般为该层函数栈缓冲区ebp-8中)；这叫做__thiscall(内平栈，从右到左堆栈传参(32位)，最后传对象指针(this指针，通过ecx传，保存在成员函数栈缓冲区ebp-8处))</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">*/</span><br></code></pre></td></tr></table></figure>]]></content>
+    
+    
+    <categories>
+      
+      <category>编程</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>C++</tag>
       
     </tags>
     
